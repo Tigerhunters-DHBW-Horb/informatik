@@ -10,8 +10,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'protos'))
 try:
     import ssl_vision_wrapper_pb2 as SSL_WrapperPacket
     import grSim_Packet_pb2 as grSim_Packet
-except ImportError:
-    print("Fehler: Protobuf-Dateien nicht gefunden!")
+except ImportError as exc:
+    raise ImportError(
+        f"Protobuf-Import fehlgeschlagen: {exc}. "
+        'Installiere protobuf in der aktiven Umgebung mit: '
+        'python -m pip install "protobuf>=3.20"'
+    ) from exc
 
 
 class KommunikationGrSim:
