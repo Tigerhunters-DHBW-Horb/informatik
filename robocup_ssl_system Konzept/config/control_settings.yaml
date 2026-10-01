@@ -1,0 +1,17 @@
+# Regelungs- und Planungsparameter
+
+world_model:
+  vision_rate_hz: 60        # nominelle Vision-Frequenz
+  vision_timeout_s: 0.2
+  process_noise: 0.01
+  measurement_noise: 0.05
+
+path_planning:
+  grid_resolution_mm: 50    # Aufloesung des A*-Gitters
+  obstacle_inflation_mm: 180  # Roboterdurchmesser (Division B)
+  pure_pursuit_lookahead_mm: 300
+
+limits:
+  max_speed_mps: 2.0        # Begrenzung fuer erste Tests
+  max_omega_radps: 6.0
+  max_kick_power: 1.0

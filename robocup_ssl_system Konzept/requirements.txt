@@ -1,0 +1,5 @@
+pyzmq>=25.0        # ZeroMQ Pub/Sub Interprozesskommunikation
+msgpack>=1.0       # kompakte Serialisierung der Dataclasses (ZMQ-Transport)
+PyYAML>=6.0        # Laden der Konfigurationsdateien
+numpy>=1.24        # Kalman-Filter, Bahnplanung, Geometrie
+protobuf>=4.0      # SSL-Vision / Referee / grSim Protobuf-Dekodierung

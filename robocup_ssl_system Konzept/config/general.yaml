@@ -1,0 +1,11 @@
+team:
+  color: "blue"      # "blue" oder "yellow"
+  id: 1              # Die ID unserer Roboter-Flotte
+
+field:
+  length: 9000       # Feldlänge in mm (SSL Division B)
+  width: 6000        # Feldbreite in mm (SSL Division B)
+  boundary_width: 300 # Randbereich in mm
+
+network:
+  zmq_base_port: 5555 # Start-Port für unsere lokale ZeroMQ Kommunikation

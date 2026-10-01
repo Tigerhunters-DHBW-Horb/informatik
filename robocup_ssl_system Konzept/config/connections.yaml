@@ -1,0 +1,23 @@
+# Netzwerk- und Schnittstellenkonfiguration.
+
+vision:
+  ip: "224.5.23.2"     # SSL-Vision Multicast-Gruppe
+  port: 10020
+
+referee:
+  ip: "224.5.23.1"     # SSL Game Controller Multicast-Gruppe
+  port: 10003
+
+grsim:
+  ip: "127.0.0.1"      # grSim-Kommandoschnittstelle
+  port: 20011
+
+# Interne Kommunikation (ZeroMQ Pub/Sub)
+zmq_topics:
+  vision_frames:   5555
+  telemetry:       5556
+  world_state:     5557
+  robot_intents:   5558
+  hardware_cmds:   5559
+  system_state:    5560
+  halt:            5561   # dedizierter Sicherheitspfad (hoechste Prioritaet)
