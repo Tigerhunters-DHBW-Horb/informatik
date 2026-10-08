@@ -11,9 +11,9 @@ import ssl_vision_wrapper_pb2 as SSL_WrapperPacket
 
 # --- Konfiguration ---
 VISION_MULTICAST_IP = "224.5.23.2"
-VISION_PORT = 10020
+VISION_PORT = 10006
 
-AUSGABE_INTERVALL = 1.0   # Ausgabe alle 10 Sekunden
+AUSGABE_INTERVALL = 0.01   # Ausgabe alle 10 Sekunden
 # ---------------------
 
 

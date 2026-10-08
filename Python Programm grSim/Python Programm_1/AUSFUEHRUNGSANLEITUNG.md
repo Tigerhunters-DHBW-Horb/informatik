@@ -82,6 +82,28 @@ python test_receiver.py
 
 Das Skript zeigt empfangene Ball- und Roboterpositionen an. Es sendet keine Fahrbefehle. Beenden mit `Ctrl+C`.
 
+### `vision_dashboard.py` - Roboterposition und Verlauf live anzeigen
+
+```bash
+python vision_dashboard.py
+```
+
+Das Dashboard zeigt links die Position und Ausrichtung des Roboters auf dem
+Spielfeld. Rechts werden X-Position, Y-Position und Rotation ueber die Zeit
+angezeigt (letzte 60 Sekunden). Zusaetzlich zeigt es Mittelwerte,
+Stichproben-Standardabweichungen, radiale 2D-Streuung, den maximalen Abstand
+vom Positionsmittel, die kreisfoermige Rotations-Standardabweichung,
+Empfangsrate, Zeit-Jitter und SSL-Konfidenz an. Die Kennwerte beziehen sich
+auf das angezeigte Zeitfenster. Streuung ist nicht gleich absolute Genauigkeit:
+Bewegungen des Roboters tragen ebenfalls dazu bei; fuer absolute Genauigkeit
+braucht man eine unabhaengige Referenzposition.
+
+Team, Roboter-ID und SSL-Vision-Port koennen am Anfang der Datei angepasst
+werden. Voreingestellt sind gelbes Team, Roboter-ID `1` und UDP-Port `10006`
+(wie in der aktuellen Konfiguration von `test_receiver.py`). Das Programm
+sendet keine Fahrbefehle.
+Zum Beenden das Dashboard-Fenster schliessen.
+
 ### Kalman-Filter-Simulationen
 
 ```powershell
