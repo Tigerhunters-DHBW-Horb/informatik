@@ -1,5 +1,8 @@
+import csv
+import datetime
 import os
 import math
+import re
 import socket
 import statistics
 import struct
@@ -10,6 +13,7 @@ from collections import deque
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Circle, Rectangle
+from matplotlib.widgets import Button, TextBox
 from google.protobuf.message import DecodeError
 
 
@@ -20,11 +24,12 @@ import ssl_vision_wrapper_pb2 as SSL_WrapperPacket
 # --- Konfiguration ---
 VISION_MULTICAST_IP = "224.5.23.2"
 VISION_PORT = 10006
-ROBOTER_ID = 1
-TEAM_GELB = True
+ROBOTER_ID = 0
+TEAM_GELB = False
 
 ANZEIGE_DAUER = 60.0  # Sekunden Zeitverlauf im Diagramm
 AKTUALISIERUNG_MS = 50
+MESSUNGS_ORDNER = "Messungen"
 # ---------------------
 
 
@@ -45,9 +50,9 @@ def erstelle_empfaenger():
     return sock
 
 
-def berechne_kennwerte(messwerte):
+def berechne_statistik(messwerte):
     if not messwerte:
-        return "Noch keine Messwerte"
+        return {}
 
     zeiten = [messwert[0] for messwert in messwerte]
     x_werte = [messwert[1] for messwert in messwerte]
@@ -55,11 +60,19 @@ def berechne_kennwerte(messwerte):
     winkel = [messwert[3] for messwert in messwerte if math.isfinite(messwert[3])]
     konfidenzen = [messwert[4] for messwert in messwerte]
 
+    werte = {
+        "sample_count": len(messwerte),
+        "duration_s": zeiten[-1] - zeiten[0],
+        "x_mean_mm": statistics.fmean(x_werte),
+        "y_mean_mm": statistics.fmean(y_werte),
+        "confidence_mean": statistics.fmean(konfidenzen),
+    }
+
     if len(messwerte) > 1:
-        x_mittel = statistics.fmean(x_werte)
-        y_mittel = statistics.fmean(y_werte)
-        x_std = statistics.stdev(x_werte)
-        y_std = statistics.stdev(y_werte)
+        x_mittel = werte["x_mean_mm"]
+        y_mittel = werte["y_mean_mm"]
+        werte["x_std_mm"] = statistics.stdev(x_werte)
+        werte["y_std_mm"] = statistics.stdev(y_werte)
         radial_rms = math.sqrt(
             statistics.fmean(
                 (x - x_mittel) ** 2 + (y - y_mittel) ** 2
@@ -78,47 +91,84 @@ def berechne_kennwerte(messwerte):
             if zeiten[-1] > zeiten[0]
             else 0.0
         )
-        jitter_text = (
-            f"{statistics.stdev(intervalle) * 1000:.2f} ms"
-            if len(intervalle) > 1
-            else "n/a"
+        werte.update(
+            {
+                "position_rms_2d_mm": radial_rms,
+                "max_distance_mm": max_abstand,
+                "rate_hz": rate,
+                "interval_jitter_ms": (
+                    statistics.stdev(intervalle) * 1000
+                    if len(intervalle) > 1
+                    else None
+                ),
+                "confidence_std": statistics.stdev(konfidenzen),
+            }
         )
-        konfidenz_std = statistics.stdev(konfidenzen)
-        position_text = (
-            f"X: {x_mittel:.1f} +/- {x_std:.1f} mm   "
-            f"Y: {y_mittel:.1f} +/- {y_std:.1f} mm"
-        )
-        streuung_text = (
-            f"2D RMS: {radial_rms:.1f} mm   Max. Abstand zum Mittel: "
-            f"{max_abstand:.1f} mm"
-        )
-        empfang_text = f"Rate: {rate:.1f} Hz   Zeit-Jitter: {jitter_text}"
-        konfidenz_text = (
-            f"SSL-Konfidenz: {statistics.fmean(konfidenzen):.3f} "
-            f"+/- {konfidenz_std:.3f}"
-        )
-    else:
-        position_text = f"X: {x_werte[0]:.1f} mm   Y: {y_werte[0]:.1f} mm"
-        streuung_text = "Streuung: mindestens 2 Messwerte erforderlich"
-        empfang_text = "Rate: wird berechnet, sobald weitere Messwerte eintreffen"
-        konfidenz_text = f"SSL-Konfidenz: {konfidenzen[0]:.3f}"
 
     if len(winkel) > 1:
         sin_mittel = statistics.fmean(math.sin(wert) for wert in winkel)
         cos_mittel = statistics.fmean(math.cos(wert) for wert in winkel)
         resultant = min(1.0, math.hypot(sin_mittel, cos_mittel))
-        winkel_mittel = math.degrees(math.atan2(sin_mittel, cos_mittel))
-        winkel_std = (
+        werte["orientation_mean_deg"] = math.degrees(
+            math.atan2(sin_mittel, cos_mittel)
+        )
+        werte["orientation_circular_std_deg"] = (
             math.degrees(math.sqrt(-2.0 * math.log(resultant)))
             if resultant > 0
             else float("inf")
         )
+    elif winkel:
+        werte["orientation_mean_deg"] = math.degrees(winkel[0])
+        werte["orientation_circular_std_deg"] = None
+
+    return werte
+
+
+def berechne_kennwerte(messwerte):
+    if not messwerte:
+        return "Noch keine Messwerte"
+
+    werte = berechne_statistik(messwerte)
+    x_mittel = werte["x_mean_mm"]
+    y_mittel = werte["y_mean_mm"]
+    zeiten = [messwert[0] for messwert in messwerte]
+
+    if len(messwerte) > 1:
+        x_std = werte["x_std_mm"]
+        y_std = werte["y_std_mm"]
+        position_text = (
+            f"X: {x_mittel:.1f} +/- {x_std:.1f} mm   "
+            f"Y: {y_mittel:.1f} +/- {y_std:.1f} mm"
+        )
+        streuung_text = (
+            f"2D RMS: {werte['position_rms_2d_mm']:.1f} mm   "
+            f"Max. Abstand zum Mittel: {werte['max_distance_mm']:.1f} mm"
+        )
+        empfang_text = (
+            f"Rate: {werte['rate_hz']:.1f} Hz   "
+            f"Zeit-Jitter: "
+            f"{werte['interval_jitter_ms']:.2f} ms"
+            if werte["interval_jitter_ms"] is not None
+            else f"Rate: {werte['rate_hz']:.1f} Hz   Zeit-Jitter: n/a"
+        )
+        konfidenz_text = (
+            f"SSL-Konfidenz: {werte['confidence_mean']:.3f} "
+            f"+/- {werte['confidence_std']:.3f}"
+        )
+    else:
+        position_text = f"X: {x_mittel:.1f} mm   Y: {y_mittel:.1f} mm"
+        streuung_text = "Streuung: mindestens 2 Messwerte erforderlich"
+        empfang_text = "Rate: wird berechnet, sobald weitere Messwerte eintreffen"
+        konfidenz_text = f"SSL-Konfidenz: {werte['confidence_mean']:.3f}"
+
+    if werte.get("orientation_circular_std_deg") is not None:
         rotation_text = (
-            f"Rotation: {winkel_mittel:.1f} +/- {winkel_std:.1f} Grad "
+            f"Rotation: {werte['orientation_mean_deg']:.1f} +/- "
+            f"{werte['orientation_circular_std_deg']:.1f} Grad "
             "(Kreis-Std.)"
         )
-    elif winkel:
-        rotation_text = f"Rotation: {math.degrees(winkel[0]):.1f} Grad"
+    elif werte.get("orientation_mean_deg") is not None:
+        rotation_text = f"Rotation: {werte['orientation_mean_deg']:.1f} Grad"
     else:
         rotation_text = "Rotation: keine Messwerte"
 
@@ -133,6 +183,84 @@ def berechne_kennwerte(messwerte):
     )
 
 
+def speichere_messung(
+    dateipfad, rohe_messungen, statistiken, messdauer_s, aufloesung_hz
+):
+    team = "gelb" if TEAM_GELB else "blau"
+
+    with open(dateipfad, "w", newline="", encoding="utf-8-sig") as datei:
+        writer = csv.writer(datei, delimiter=";")
+        writer.writerow(["Einzelmessungen"])
+        writer.writerow(
+            [
+                "Messung",
+                "Zeitpunkt",
+                "Zeit seit Messbeginn (s)",
+                "Roboter-ID",
+                "Team",
+                "X (mm)",
+                "Y (mm)",
+                "Rotation (rad)",
+                "Rotation (Grad)",
+                "SSL-Konfidenz",
+                "Aufloesung (Hz)",
+            ]
+        )
+        for messnummer, messung in enumerate(rohe_messungen, start=1):
+            elapsed, zeitpunkt, x, y, phi, konfidenz = messung
+            writer.writerow(
+                [
+                    messnummer,
+                    zeitpunkt,
+                    f"{elapsed:.6f}",
+                    ROBOTER_ID,
+                    team,
+                    f"{x:.3f}",
+                    f"{y:.3f}",
+                    f"{phi:.6f}" if math.isfinite(phi) else "",
+                    f"{math.degrees(phi):.3f}" if math.isfinite(phi) else "",
+                    f"{konfidenz:.6f}",
+                    f"{aufloesung_hz:.3f}",
+                ]
+            )
+
+        writer.writerow([])
+        writer.writerow(["Kennwerte der gesamten Messung"])
+        writer.writerow(["Kennwert", "Wert", "Einheit"])
+        zusammenfassung = [
+            ("Roboter-ID", ROBOTER_ID, ""),
+            ("Team", team, ""),
+            ("Vorgegebene Messdauer", messdauer_s, "s"),
+            ("Ziel-Aufloesung", aufloesung_hz, "Hz"),
+            ("Anzahl Messwerte", statistiken.get("sample_count"), ""),
+            ("Messwertzeitraum", statistiken.get("duration_s"), "s"),
+            ("X-Mittelwert", statistiken.get("x_mean_mm"), "mm"),
+            ("X-Standardabweichung", statistiken.get("x_std_mm"), "mm"),
+            ("Y-Mittelwert", statistiken.get("y_mean_mm"), "mm"),
+            ("Y-Standardabweichung", statistiken.get("y_std_mm"), "mm"),
+            ("Positionsstreuung 2D RMS", statistiken.get("position_rms_2d_mm"), "mm"),
+            ("Maximaler Abstand zum Mittel", statistiken.get("max_distance_mm"), "mm"),
+            ("Rotationsmittelwert", statistiken.get("orientation_mean_deg"), "Grad"),
+            (
+                "Rotations-Standardabweichung (kreisfoermig)",
+                statistiken.get("orientation_circular_std_deg"),
+                "Grad",
+            ),
+            ("Empfangsrate", statistiken.get("rate_hz"), "Hz"),
+            ("Zeit-Jitter", statistiken.get("interval_jitter_ms"), "ms"),
+            ("SSL-Konfidenz Mittelwert", statistiken.get("confidence_mean"), ""),
+            (
+                "SSL-Konfidenz Standardabweichung",
+                statistiken.get("confidence_std"),
+                "",
+            ),
+        ]
+        for name, wert, einheit in zusammenfassung:
+            if isinstance(wert, float):
+                wert = f"{wert:.6f}"
+            writer.writerow([name, "" if wert is None else wert, einheit])
+
+
 def erstelle_dashboard():
     team_name = "Gelb" if TEAM_GELB else "Blau"
     team_farbe = "#f2c94c" if TEAM_GELB else "#4c8bf5"
@@ -144,25 +272,37 @@ def erstelle_dashboard():
     letzter_empfang = None
     feld_laenge, feld_breite = 12000, 9000
 
-    fig = plt.figure(figsize=(14, 9), constrained_layout=True)
+    fig = plt.figure(figsize=(14, 10))
     fig.suptitle(
         f"SSL-Vision Live-Dashboard — {team_name}er Roboter {ROBOTER_ID}",
         fontsize=15,
         fontweight="bold",
+        y=0.99,
     )
     layout = fig.add_gridspec(
         4,
         2,
+        left=0.07,
+        right=0.97,
+        bottom=0.06,
+        top=0.85,
         width_ratios=(1.25, 1),
-        height_ratios=(1, 1, 1, 1.1),
+        height_ratios=(1, 1, 1, 0.9),
+        hspace=0.75,
+        wspace=0.25,
     )
     ax_feld = fig.add_subplot(layout[:, 0])
     ax_x = fig.add_subplot(layout[0, 1])
     ax_y = fig.add_subplot(layout[1, 1], sharex=ax_x)
     ax_phi = fig.add_subplot(layout[2, 1], sharex=ax_x)
     ax_kennwerte = fig.add_subplot(layout[3, 1])
-    ax_kennwerte.axis("off")
-    ax_kennwerte.set_title("Kennwerte (rollierende 60 s)", loc="left")
+    ax_kennwerte.set_xticks([])
+    ax_kennwerte.set_yticks([])
+    for spine in ax_kennwerte.spines.values():
+        spine.set_visible(False)
+    ax_kennwerte.set_title(
+        "Kennwerte (rollierende 60 s)", loc="left", pad=3
+    )
     kennwerte_text = ax_kennwerte.text(
         0,
         0.92,
@@ -182,7 +322,7 @@ def erstelle_dashboard():
         ax.set_ylabel(label, color=farbe)
         ax.grid(True, alpha=0.25)
         ax.tick_params(axis="y", labelcolor=farbe)
-    ax_phi.set_xlabel("Zeit seit Programmstart (s)")
+    ax_phi.set_xlabel("Zeit seit Programmstart (s)", labelpad=3)
 
     linie_x, = ax_x.plot([], [], color="#2d9cdb", linewidth=1.5)
     linie_y, = ax_y.plot([], [], color="#27ae60", linewidth=1.5)
@@ -227,8 +367,37 @@ def erstelle_dashboard():
         color="white",
         bbox={"facecolor": "black", "alpha": 0.55, "pad": 5},
     )
+    messungs_status = fig.text(
+        0.5,
+        0.905,
+        "Messbereit. Die CSV-Datei wird nach Ablauf der Messdauer gespeichert.",
+        ha="center",
+        va="center",
+        fontsize=9,
+    )
+    ax_dauer = fig.add_axes([0.04, 0.925, 0.16, 0.035])
+    ax_aufloesung = fig.add_axes([0.26, 0.925, 0.16, 0.035])
+    ax_dateiname = fig.add_axes([0.48, 0.925, 0.29, 0.035])
+    ax_start = fig.add_axes([0.82, 0.92, 0.15, 0.045])
+    eingabe_dauer = TextBox(ax_dauer, "Dauer (s):", initial="15")
+    eingabe_aufloesung = TextBox(ax_aufloesung, "Aufloesung (Hz):", initial="25")
+    eingabe_dateiname = TextBox(
+        ax_dateiname, "Dateiname:", initial=""
+    )
+    start_knopf = Button(ax_start, "Messung starten")
+    messung = {
+        "aktiv": False,
+        "start": None,
+        "dauer": 0.0,
+        "aufloesung_hz": 0.0,
+        "name": "",
+        "rohdaten": [],
+    }
 
-    def update(_frame):
+    animation = None
+    aufnahme_timer = fig.canvas.new_timer(interval=10)
+
+    def verarbeite_pakete(aktualisiere_feld):
         nonlocal letzter_empfang, feld_laenge, feld_breite
         packets = 0
         while packets < 500:
@@ -245,7 +414,7 @@ def erstelle_dashboard():
                 print(f"Ungueltiges SSL-Vision-Protobuf-Paket ignoriert: {exc}")
                 continue
 
-            if packet.HasField("geometry"):
+            if aktualisiere_feld and packet.HasField("geometry"):
                 feld_info = packet.geometry.field
                 feld_laenge = feld_info.field_length
                 feld_breite = feld_info.field_width
@@ -267,18 +436,158 @@ def erstelle_dashboard():
                 if not robot.HasField("robot_id") or robot.robot_id != ROBOTER_ID:
                     continue
 
-                elapsed = time.monotonic() - startzeit
+                received_at = time.monotonic()
+                elapsed = received_at - startzeit
                 phi = (
                     robot.orientation
                     if robot.HasField("orientation")
                     else float("nan")
                 )
-                historie.append(
-                    (elapsed, robot.x, robot.y, phi, robot.confidence)
-                )
                 letzter_empfang = elapsed
+                if messung["aktiv"]:
+                    messungszeit = received_at - messung["start"]
+                    if (
+                        messungszeit <= messung["dauer"]
+                        and messungszeit >= messung["naechste_messung"]
+                    ):
+                        messung["rohdaten"].append(
+                            (
+                                messungszeit,
+                                datetime.datetime.now().astimezone().isoformat(
+                                    timespec="milliseconds"
+                                ),
+                                robot.x,
+                                robot.y,
+                                phi,
+                                robot.confidence,
+                            )
+                        )
+                        messung["naechste_messung"] = (
+                            messungszeit + 1.0 / messung["aufloesung_hz"]
+                        )
+                else:
+                    historie.append(
+                        (elapsed, robot.x, robot.y, phi, robot.confidence)
+                    )
                 break
 
+    def beende_messung():
+        messung["aktiv"] = False
+        aufnahme_timer.stop()
+        eingabe_dauer.set_active(True)
+        eingabe_aufloesung.set_active(True)
+        eingabe_dateiname.set_active(True)
+        start_knopf.label.set_text("Messung starten")
+        start_knopf.set_active(True)
+        if animation is not None:
+            animation.event_source.start()
+
+        if not messung["rohdaten"]:
+            messungs_status.set_text(
+                "Messung beendet: keine passenden Robotermesswerte empfangen; "
+                "es wurde keine Datei gespeichert."
+            )
+        else:
+            statistik_eingaben = [
+                (wert[0], wert[2], wert[3], wert[4], wert[5])
+                for wert in messung["rohdaten"]
+            ]
+            statistiken = berechne_statistik(statistik_eingaben)
+            zeitstempel = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            dateiname = f"{zeitstempel}_{messung['name']}.csv"
+            try:
+                speicherordner = os.path.join(
+                    os.path.dirname(__file__), MESSUNGS_ORDNER
+                )
+                os.makedirs(speicherordner, exist_ok=True)
+                dateipfad = os.path.join(speicherordner, dateiname)
+                speichere_messung(
+                    dateipfad,
+                    messung["rohdaten"],
+                    statistiken,
+                    messung["dauer"],
+                    messung["aufloesung_hz"],
+                )
+            except OSError as exc:
+                messungs_status.set_text(
+                    f"Fehler beim Speichern der Messung: {exc}"
+                )
+                print(f"Fehler beim Speichern der Messung: {exc}")
+            else:
+                messungs_status.set_text(
+                    f"Messung gespeichert: {dateiname} "
+                    f"({len(messung['rohdaten'])} Messwerte)"
+                )
+                print(f"Messung gespeichert: {dateipfad}")
+
+        fig.canvas.draw_idle()
+
+    def aufnahme_tick():
+        verarbeite_pakete(aktualisiere_feld=False)
+        if time.monotonic() - messung["start"] >= messung["dauer"]:
+            beende_messung()
+
+    aufnahme_timer.add_callback(aufnahme_tick)
+
+    def starte_messung(_event):
+        if messung["aktiv"]:
+            return
+
+        try:
+            dauer = float(eingabe_dauer.text.strip())
+            aufloesung_hz = float(eingabe_aufloesung.text.strip())
+        except ValueError:
+            messungs_status.set_text(
+                "Fehler: Dauer und Aufloesung muessen Zahlen sein."
+            )
+            fig.canvas.draw_idle()
+            return
+        if not math.isfinite(dauer) or dauer <= 0:
+            messungs_status.set_text("Fehler: Dauer muss groesser als 0 Sekunden sein.")
+            fig.canvas.draw_idle()
+            return
+        if not math.isfinite(aufloesung_hz) or aufloesung_hz <= 0:
+            messungs_status.set_text(
+                "Fehler: Aufloesung muss groesser als 0 Hz sein."
+            )
+            fig.canvas.draw_idle()
+            return
+
+        name = os.path.basename(eingabe_dateiname.text.strip())
+        if name.lower().endswith(".csv"):
+            name = name[:-4]
+        name = re.sub(r"[^A-Za-z0-9_-]+", "_", name).strip("_")
+        if not name:
+            messungs_status.set_text("Fehler: Bitte einen gueltigen Dateinamen eingeben.")
+            fig.canvas.draw_idle()
+            return
+
+        jetzt = time.monotonic()
+        messung["aktiv"] = True
+        messung["start"] = jetzt
+        messung["dauer"] = dauer
+        messung["aufloesung_hz"] = aufloesung_hz
+        messung["naechste_messung"] = 0.0
+        messung["name"] = name
+        messung["rohdaten"] = []
+        for eingabe in (eingabe_dauer, eingabe_aufloesung, eingabe_dateiname):
+            eingabe.stop_typing()
+            eingabe.set_active(False)
+        start_knopf.label.set_text("Messung laeuft")
+        start_knopf.set_active(False)
+        messungs_status.set_text(
+            f"Messung laeuft fuer {dauer:g} s mit maximal {aufloesung_hz:g} Hz. "
+            "Grafik-Aktualisierung ist pausiert."
+        )
+        if animation is not None:
+            animation.event_source.stop()
+        aufnahme_timer.start()
+        fig.canvas.draw_idle()
+
+    start_knopf.on_clicked(starte_messung)
+
+    def update(_frame):
+        verarbeite_pakete(aktualisiere_feld=True)
         jetzt = time.monotonic() - startzeit
         while historie and jetzt - historie[0][0] > ANZEIGE_DAUER:
             historie.popleft()
@@ -343,6 +652,7 @@ def erstelle_dashboard():
         )
 
     def beim_schliessen(_event):
+        aufnahme_timer.stop()
         sock.close()
 
     fig.canvas.mpl_connect("close_event", beim_schliessen)

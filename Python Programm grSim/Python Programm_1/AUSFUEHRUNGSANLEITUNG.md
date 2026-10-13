@@ -101,7 +101,19 @@ braucht man eine unabhaengige Referenzposition.
 Team, Roboter-ID und SSL-Vision-Port koennen am Anfang der Datei angepasst
 werden. Voreingestellt sind gelbes Team, Roboter-ID `1` und UDP-Port `10006`
 (wie in der aktuellen Konfiguration von `test_receiver.py`). Das Programm
-sendet keine Fahrbefehle.
+sendet keine Fahrbefehle. Im Fenster koennen Messdauer in Sekunden,
+maximale Speicher-Abtastrate in Hz und Dateiname eingegeben werden. Hoehere
+SSL-Vision-Empfangsraten werden entsprechend ausgeduennt; niedrigere
+Abtastraten koennen nicht erzwungen werden. Nach Klick auf
+**Messung starten** wird die Grafikaktualisierung pausiert, waehrend der
+Empfang ueber einen eigenen GUI-Timer weiterlaeuft. Damit wird waehrend der
+Messung kein Diagramm neu gezeichnet. Die Messwerte werden fuer die
+eingestellte Dauer aufgenommen und automatisch als Semikolon-getrennte
+CSV-Datei im Unterordner `Messungen` gespeichert. Der Dateiname beginnt mit
+Datum und Uhrzeit, zum Beispiel
+`20261013_142530_123456_ssl_vision_messung.csv`. Die Tabelle enthaelt eine
+Zeile pro Messwert (Zeit, Position, Rotation und SSL-Konfidenz). Am Ende der
+CSV-Datei folgt ein eigener Abschnitt mit den Kennwerten der gesamten Messung.
 Zum Beenden das Dashboard-Fenster schliessen.
 
 ### Kalman-Filter-Simulationen
