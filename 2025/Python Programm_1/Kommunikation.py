@@ -19,7 +19,13 @@ except ImportError as exc:
 
 
 class KommunikationGrSim:
-    def __init__(self, vm_ip, vision_port=10020, command_port=20011):
+    def __init__(
+        self,
+        vm_ip,
+        vision_port=10006,
+        command_port=20011,
+        vision_multicast_ip="224.5.23.2"
+    ):
         self.vm_ip = vm_ip
 
         # Vision-Empfänger Multicast
@@ -34,9 +40,9 @@ class KommunikationGrSim:
         self.recv_sock.setblocking(False)
 
         mreq = struct.pack(
-            "4sl",
-            socket.inet_aton("224.5.23.2"),
-            socket.INADDR_ANY
+            "=4s4s",
+            socket.inet_aton(vision_multicast_ip),
+            socket.inet_aton("0.0.0.0")
         )
 
         self.recv_sock.setsockopt(
@@ -49,8 +55,8 @@ class KommunikationGrSim:
         self.send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.grsim_addr = (self.vm_ip, command_port)
 
-        print(f"Kommunikation bereit.")
-        print(f"Vision-Port: {vision_port}")
+        print("Kommunikation bereit.")
+        print(f"SSL-Vision Multicast: {vision_multicast_ip}:{vision_port}")
         print(f"Command-Ziel: {self.vm_ip}:{command_port}")
 
     def empfange_paket(self):

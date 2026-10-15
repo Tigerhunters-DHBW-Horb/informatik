@@ -272,7 +272,7 @@ def erstelle_dashboard():
     letzter_empfang = None
     feld_laenge, feld_breite = 12000, 9000
 
-    fig = plt.figure(figsize=(14, 10))
+    fig = plt.figure(figsize=(18, 13))
     fig.suptitle(
         f"SSL-Vision Live-Dashboard — {team_name}er Roboter {ROBOTER_ID}",
         fontsize=15,
@@ -284,12 +284,12 @@ def erstelle_dashboard():
         2,
         left=0.07,
         right=0.97,
-        bottom=0.06,
+        bottom=0.055,
         top=0.85,
         width_ratios=(1.25, 1),
-        height_ratios=(1, 1, 1, 0.9),
-        hspace=0.75,
-        wspace=0.25,
+        height_ratios=(1, 1, 1, 1.05),
+        hspace=1.0,
+        wspace=0.35,
     )
     ax_feld = fig.add_subplot(layout[:, 0])
     ax_x = fig.add_subplot(layout[0, 1])
@@ -324,10 +324,19 @@ def erstelle_dashboard():
         ax.tick_params(axis="y", labelcolor=farbe)
     ax_phi.set_xlabel("Zeit seit Programmstart (s)", labelpad=3)
 
-    linie_x, = ax_x.plot([], [], color="#2d9cdb", linewidth=1.5)
-    linie_y, = ax_y.plot([], [], color="#27ae60", linewidth=1.5)
-    linie_phi, = ax_phi.plot([], [], color="#9b51e0", linewidth=1.5)
-    linien = (linie_x, linie_y, linie_phi)
+    punkte_x, = ax_x.plot(
+        [], [], linestyle="None", marker="o", markersize=3,
+        color="#2d9cdb", alpha=0.75
+    )
+    punkte_y, = ax_y.plot(
+        [], [], linestyle="None", marker="o", markersize=3,
+        color="#27ae60", alpha=0.75
+    )
+    punkte_phi, = ax_phi.plot(
+        [], [], linestyle="None", marker="o", markersize=3,
+        color="#9b51e0", alpha=0.75
+    )
+    punkte = (punkte_x, punkte_y, punkte_phi)
 
     ax_feld.set_title("Position und Ausrichtung auf dem Spielfeld")
     ax_feld.set_xlabel("X (mm)")
@@ -618,9 +627,9 @@ def erstelle_dashboard():
 
             werte = list(historie)
             zeiten = [wert[0] for wert in werte]
-            linien[0].set_data(zeiten, [wert[1] for wert in werte])
-            linien[1].set_data(zeiten, [wert[2] for wert in werte])
-            linien[2].set_data(
+            punkte[0].set_data(zeiten, [wert[1] for wert in werte])
+            punkte[1].set_data(zeiten, [wert[2] for wert in werte])
+            punkte[2].set_data(
                 zeiten,
                 [
                     math.degrees(wert[3])
@@ -643,7 +652,7 @@ def erstelle_dashboard():
         rechte_grenze = max(ANZEIGE_DAUER, jetzt)
         ax_phi.set_xlim(linke_grenze, rechte_grenze)
         return (
-            *linien,
+            *punkte,
             roboter_punkt,
             richtung,
             id_text,

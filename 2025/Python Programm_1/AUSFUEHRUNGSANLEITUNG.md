@@ -8,7 +8,7 @@ Diese Anleitung beschreibt, welche Python-Dateien eigenstaendige Programme sind,
 
 Starte zuerst grSim und pruefe, ob SSL-Vision-Daten gesendet werden. Die Programme verwenden standardmaessig:
 
-- SSL-Vision-Multicast: `224.5.23.2`, UDP-Port `10020`
+- SSL-Vision-Multicast: `224.5.23.2` auf UDP-Port `10006`
 - grSim-Befehle: UDP-Port `20011`
 
 Der Rechner, auf dem Python laeuft, muss den Simulator im Netzwerk erreichen koennen. Firewall-Regeln und Netzwerkschnittstellen muessen UDP- und Multicast-Verkehr erlauben.
@@ -46,11 +46,12 @@ python main.py
 
 Vor dem Start in `main.py` pruefen:
 
-- `VM_IP`: Adresse des Rechners mit grSim (voreingestellt: `192.168.42.41`)
-- `ROBOTER_ID`: Roboter-ID (voreingestellt: `1`)
+- `VM_IP`: Adresse des Rechners mit grSim (voreingestellt: `127.0.0.1`, grSim auf demselben Rechner)
+- `ROBOTER_ID`: Roboter-ID (voreingestellt: `4`)
 - `TEAM_GELB`: `True` fuer Gelb, `False` fuer Blau
+- `VISION_MULTICAST_IP` und `VISION_PORT`: SSL-Vision-Adresse und -Port (voreingestellt: `224.5.23.2:10006`)
 
-Das Programm empfaengt Vision-Daten und sendet fortlaufend Fahrbefehle. Es steuert den Roboter zum Ball und soll in etwa 120 mm Abstand anhalten. Mit `Ctrl+C` beenden; dabei wird ein Stoppbefehl gesendet.
+Das Programm empfaengt SSL-Vision-Daten und sendet fortlaufend Fahrbefehle. Es steuert den Roboter zum Ball und soll in etwa 120 mm Abstand anhalten. Die Debug-Anzeige wird einmal pro Sekunde aktualisiert und leert dafuer das Terminal. Zusaetzlich oeffnet sich ein Live-Diagramm mit SSL-Rohmessungen und Kalman-Filter-Ausgaben fuer Roboterposition/-ausrichtung und Ballposition (jeweils die letzten 10 Sekunden). Eine Spielfeldansicht zeigt Roboter, Ball sowie den aktuellen Fahrbefehl als Richtungspfeil mit Geschwindigkeitsangabe. Dafuer ist eine grafische Desktop-Sitzung erforderlich. Wenn Ball- oder Robotermessungen laenger als 0,5 Sekunden ausbleiben, wird der Roboter gestoppt, bis wieder aktuelle Messungen eintreffen. Mit `Ctrl+C` oder durch Schliessen des Grafikfensters beenden; dabei wird ein Stoppbefehl gesendet.
 
 ### `steuerung.py` - manuelle Tastatursteuerung
 
@@ -82,6 +83,15 @@ python test_receiver.py
 
 Das Skript zeigt empfangene Ball- und Roboterpositionen an. Es sendet keine Fahrbefehle. Beenden mit `Ctrl+C`.
 
+### `vision_terminal.py` - alle SSL-Vision-Daten im Terminal anzeigen
+
+```powershell
+python vision_terminal.py
+```
+
+Das Skript gibt jedes empfangene SSL-Vision-Paket mit Empfangszeit, Absender
+und vollstaendigem Protobuf-Inhalt als lesbaren Text aus. Beenden mit `Ctrl+C`.
+
 ### `vision_dashboard.py` - Roboterposition und Verlauf live anzeigen
 
 ```bash
@@ -90,7 +100,9 @@ python vision_dashboard.py
 
 Das Dashboard zeigt links die Position und Ausrichtung des Roboters auf dem
 Spielfeld. Rechts werden X-Position, Y-Position und Rotation ueber die Zeit
-angezeigt (letzte 60 Sekunden). Zusaetzlich zeigt es Mittelwerte,
+als einzelne Messpunkte angezeigt (letzte 60 Sekunden); das vergroesserte
+Fenster und die groesseren Abstaende zwischen den Diagrammen erleichtern die
+Betrachtung der einzelnen Bereiche. Zusaetzlich zeigt es Mittelwerte,
 Stichproben-Standardabweichungen, radiale 2D-Streuung, den maximalen Abstand
 vom Positionsmittel, die kreisfoermige Rotations-Standardabweichung,
 Empfangsrate, Zeit-Jitter und SSL-Konfidenz an. Die Kennwerte beziehen sich

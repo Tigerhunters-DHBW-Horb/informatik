@@ -20,6 +20,7 @@ Dieses Projekt verbindet einen Python-Roboter mit dem Simulator grSim. Es kann S
 | `steuerung.py` | Manuelle Tastatursteuerung fuer grSim. Tasten: `W/S` vor/zurueck, `A/D` seitwaerts, `Q/E` drehen, `Leertaste` stoppen, `ESC` beenden. |
 | `test_sender.py` | Interaktiver UDP-Testsender mit Auswahl einfacher Fahrbefehle. |
 | `test_receiver.py` | Lauscht auf SSL-Vision-Multicast und gibt erkannte Baelle und Roboter aus. |
+| `vision_terminal.py` | Gibt jedes empfangene SSL-Vision-Paket vollstaendig als lesbaren Protobuf-Text im Terminal aus. |
 
 ### Protobuf-Dateien (`protos/`)
 
@@ -33,7 +34,7 @@ Die Dateien `*.proto` beschreiben die Nachrichtenformate von grSim und der SSL-S
 
 - Python 3
 - Ein gestarteter und erreichbarer grSim-Simulator, der SSL-Vision-Daten sendet
-- Netzwerkzugriff auf den Simulator; SSL-Vision verwendet standardmaessig Multicast `224.5.23.2` auf UDP-Port `10020`, grSim-Befehle gehen standardmaessig an UDP-Port `20011`
+- Netzwerkzugriff auf den Simulator; SSL-Vision verwendet Multicast `224.5.23.2` auf UDP-Port `10006`, grSim-Befehle gehen standardmaessig an UDP-Port `20011`
 - Python-Pakete: `numpy`, `matplotlib`, `filterpy`, `pynput` und `protobuf`
 
 Es gibt derzeit keine `requirements.txt` mit festgelegten Versionen. Die Pakete koennen in einem Terminal im Projektordner installiert werden:
@@ -47,16 +48,19 @@ python -m pip install numpy matplotlib filterpy pynput protobuf
 1. Starte grSim und stelle sicher, dass SSL-Vision im Netzwerk erreichbar ist.
 2. Oeffne ein Terminal im Ordner `Python Programm_1` (oder wechsle aus dem uebergeordneten Ordner mit `cd "Python Programm_1"` dorthin).
 3. Pruefe in `main.py` die Konfiguration am Dateianfang:
-   - `VM_IP`: IP-Adresse des Rechners bzw. der VM mit grSim (aktuell `192.168.42.41`)
-   - `ROBOTER_ID`: ID des zu steuernden Roboters (aktuell `1`)
+   - `VM_IP`: IP-Adresse des Rechners mit grSim (aktuell `127.0.0.1`, also derselbe Rechner)
+   - `ROBOTER_ID`: ID des zu steuernden Roboters (aktuell `4`)
    - `TEAM_GELB`: `True` fuer das gelbe, `False` fuer das blaue Team
+   - `VISION_MULTICAST_IP` und `VISION_PORT`: SSL-Vision Multicast-Adresse und UDP-Port (standardmaessig `224.5.23.2:10006`)
 4. Starte das Programm:
 
 ```powershell
 python main.py
 ```
 
-`main.py` sendet fortlaufend Fahrbefehle. Es faehrt den konfigurierten Roboter zum Ball und haelt ungefaehr 120 mm Abstand. Beenden mit `Ctrl+C`; dabei wird ein Stoppbefehl gesendet. Starte das Programm erst, wenn IP-Adresse, Team, Roboter-ID und Simulatorverbindung stimmen.
+`main.py` empfängt SSL-Vision-Daten und sendet fortlaufend Fahrbefehle. Es fährt den konfigurierten Roboter zum Ball und hält ungefähr 120 mm Abstand. Die Debug-Anzeige wird einmal pro Sekunde aktualisiert und leert dafür das Terminal. Sind Ball- oder Robotermessungen länger als 0,5 Sekunden veraltet, wird der Roboter gestoppt, bis wieder frische Messungen eintreffen. Beenden mit `Ctrl+C`; dabei wird ein Stoppbefehl gesendet. Starte das Programm erst, wenn IP-Adresse, Team, Roboter-ID und Simulatorverbindung stimmen.
+
+Beim Start öffnet sich außerdem ein Live-Diagramm: Es vergleicht die von SSL-Vision gemessenen X-/Y-Positionen und Roboterorientierung des ausgewählten Roboters sowie die Ballposition mit den jeweiligen Kalman-Filter-Ausgaben (letzte 10 Sekunden). Die Spielfeldansicht markiert Roboter und Ball; ein grüner Pfeil zeigt Richtung und relative Stärke des aktuellen Fahrbefehls. Der Text darunter enthält die Sollgeschwindigkeit und die tatsächlich gesendeten lokalen X-/Y-Geschwindigkeiten. Das Plotfenster zu schließen beendet das Programm und sendet einen Stoppbefehl. Dafür muss eine grafische Desktop-Sitzung verfügbar sein.
 
 ## Weitere Startmoeglichkeiten
 
@@ -64,13 +68,14 @@ Die folgenden Programme werden ebenfalls aus `Python Programm_1` gestartet:
 
 ```powershell
 python test_receiver.py
+python vision_terminal.py
 python test_sender.py
 python steuerung.py
 python KF_Ball.py
 python KF_Roboter.py
 ```
 
-`test_receiver.py` prueft den Vision-Empfang. `test_sender.py` und `steuerung.py` senden direkt Fahrbefehle an die jeweils in der Datei konfigurierte IP-Adresse; diese IP-Adressen muessen gegebenenfalls unabhaengig von `main.py` angepasst werden. `KF_Ball.py` und `KF_Roboter.py` zeigen die jeweiligen Filter-Simulationen als Plot.
+`test_receiver.py` prueft den Vision-Empfang und zeigt erkannte Objekte an. `vision_terminal.py` gibt alle empfangenen SSL-Vision-Pakete als Text aus. Beide Programme verwenden standardmaessig Multicast `224.5.23.2` auf UDP-Port `10006`. `test_sender.py` und `steuerung.py` senden direkt Fahrbefehle an die jeweils in der Datei konfigurierte IP-Adresse; diese IP-Adressen muessen gegebenenfalls unabhaengig von `main.py` angepasst werden. `KF_Ball.py` und `KF_Roboter.py` zeigen die jeweiligen Filter-Simulationen als Plot.
 
 ## Aktueller Entwicklungsstand
 
