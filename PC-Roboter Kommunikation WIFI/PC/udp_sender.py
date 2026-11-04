@@ -103,8 +103,8 @@ def create_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--broadcast",
-        default="255.255.255.255",
-        help="Broadcast-Adresse des PC-Hotspots (Standard: 255.255.255.255)",
+        default="10.42.0.255",
+        help="Broadcast-Adresse des PC-Hotspots (Standard: 10.42.0.255)",
     )
     parser.add_argument("--port", type=int, default=UDP_PORT, help=f"UDP-Port (Standard: {UDP_PORT})")
     parser.add_argument(
