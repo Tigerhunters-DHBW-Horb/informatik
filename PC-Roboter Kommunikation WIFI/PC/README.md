@@ -17,6 +17,8 @@ python3 udp_sender.py \
 
 Die Broadcast-Adresse hängt vom Betriebssystem und der Konfiguration des PC-Hotspots ab. `255.255.255.255` ist der Standard; falls der Hotspot diesen begrenzten Broadcast nicht weiterleitet, gib mit `--broadcast` die Broadcast-Adresse des Hotspot-Subnetzes an. Erlaube gegebenenfalls ausgehende UDP-Pakete über den konfigurierten Port (Standard `4210`) in der Firewall.
 
+Der ESP32 leitet den Befehl für seine konfigurierte Roboter-ID per UART an den Nucleo-H753ZI weiter. Die Werte sind Fahrbefehle (`vx`, `vy`, `omega`), keine Positionsdaten aus SSL-Vision. CubeIDE-Einrichtung, Verdrahtung und serielle Anzeige sind in [`../Roboter/Nucleo/README.md`](../Roboter/Nucleo/README.md) beschrieben.
+
 Mit `--rate 100` lässt sich die Senderate auf 100 Pakete pro Sekunde setzen. `--once` sendet einen einzelnen Testdatensatz. Beim Beenden mit STRG+C wird für alle angegebenen IDs noch ein Stoppbefehl gesendet.
 
 ## Protokollversion 1

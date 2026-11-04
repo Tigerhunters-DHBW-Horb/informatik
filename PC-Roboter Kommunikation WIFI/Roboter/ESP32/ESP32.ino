@@ -11,11 +11,15 @@ const char *WIFI_PASSWORD = "PasswortHierEintragen";
 constexpr uint8_t ROBOT_ID = 0;
 constexpr uint16_t UDP_PORT = 4210;
 constexpr uint8_t PROTOCOL_VERSION = 1;
+constexpr uint32_t NUCLEO_BAUD_RATE = 115200;
+constexpr int NUCLEO_UART_RX_PIN = 16;
+constexpr int NUCLEO_UART_TX_PIN = 17;
 constexpr size_t HEADER_SIZE = 12;
 constexpr size_t COMMAND_SIZE = 13;
 constexpr size_t MAX_PACKET_SIZE = HEADER_SIZE + 255 * COMMAND_SIZE;
 
 WiFiUDP udp;
+HardwareSerial NucleoSerial(2);
 uint16_t lastSequence = 0;
 uint32_t lastSessionId = 0;
 bool hasLastSequence = false;
@@ -39,9 +43,10 @@ float readFloat32(const uint8_t *data) {
 }
 
 void onRobotCommand(float vx, float vy, float omega) {
-  // Hier die Werte an die Motorsteuerung übergeben.
   Serial.printf("ID %u: vx=%.3f m/s, vy=%.3f m/s, omega=%.3f rad/s\n",
                 ROBOT_ID, vx, vy, omega);
+  NucleoSerial.printf("RBT1,%u,%.6f,%.6f,%.6f\n",
+                      ROBOT_ID, vx, vy, omega);
 }
 
 void processPacket(const uint8_t *packet, size_t length) {
@@ -102,6 +107,8 @@ void processPacket(const uint8_t *packet, size_t length) {
 
 void setup() {
   Serial.begin(115200);
+  NucleoSerial.begin(
+      NUCLEO_BAUD_RATE, SERIAL_8N1, NUCLEO_UART_RX_PIN, NUCLEO_UART_TX_PIN);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -120,6 +127,9 @@ void setup() {
   }
   Serial.printf("Empfange UDP-Broadcasts auf Port %u, Roboter-ID %u\n",
                 UDP_PORT, ROBOT_ID);
+  Serial.printf("Leite Befehle per UART2 (TX GPIO %d, %lu Baud) an den Nucleo weiter\n",
+                NUCLEO_UART_TX_PIN,
+                static_cast<unsigned long>(NUCLEO_BAUD_RATE));
 }
 
 void loop() {

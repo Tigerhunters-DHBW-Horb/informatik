@@ -1,0 +1,4 @@
+{
+  "cmake.configurePreset": "nucleo-h753zi",
+  "cmake.buildPreset": "nucleo-h753zi"
+}
