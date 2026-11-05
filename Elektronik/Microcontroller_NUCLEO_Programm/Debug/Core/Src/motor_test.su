@@ -1,0 +1,9 @@
+../Core/Src/motor_test.c:82:13:test_log	112	static
+../Core/Src/motor_test.c:113:16:button_pressed_edge	24	static
+../Core/Src/motor_test.c:144:13:led_set	24	static
+../Core/Src/motor_test.c:162:13:led_blink	16	static
+../Core/Src/motor_test.c:261:13:apply_val	24	static
+../Core/Src/motor_test.c:289:13:all_stop_safe	8	static
+../Core/Src/motor_test.c:299:16:run_segments	40	static
+../Core/Src/motor_test.c:352:6:motor_test_init	8	static
+../Core/Src/motor_test.c:375:6:motor_test_run	16	static

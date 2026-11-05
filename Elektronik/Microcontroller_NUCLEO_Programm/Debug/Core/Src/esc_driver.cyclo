@@ -1,0 +1,5 @@
+../Core/Src/esc_driver.c:18:17:clamp_pulse	3
+../Core/Src/esc_driver.c:26:6:esc_init	7
+../Core/Src/esc_driver.c:50:6:esc_set_pulse_us	7
+../Core/Src/esc_driver.c:58:6:esc_set_signed	3
+../Core/Src/esc_driver.c:74:6:esc_all_stop	2

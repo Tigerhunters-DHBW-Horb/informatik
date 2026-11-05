@@ -5,8 +5,8 @@
 #include <string.h>
 
 // WLAN-Zugangsdaten des vom PC bereitgestellten Hotspots eintragen.
-const char *WIFI_SSID = "PC-Hotspot";
-const char *WIFI_PASSWORD = "PasswortHierEintragen";
+const char *WIFI_SSID = "robocup";
+const char *WIFI_PASSWORD = "tigerhunters";
 
 constexpr uint8_t ROBOT_ID = 0;
 constexpr uint16_t UDP_PORT = 4210;
