@@ -1,0 +1,15 @@
+#ifndef STM32H7XX_NUCLEO_CONF_H
+#define STM32H7XX_NUCLEO_CONF_H
+
+#include "stm32h7xx_hal.h"
+
+#define USE_STM32H7XX_NUCLEO
+#define USE_NUCLEO_144
+#define USE_NUCLEO_H753ZI
+
+#define USE_COM_LOG 0U
+#define USE_BSP_COM_FEATURE 1U
+
+#define BSP_BUTTON_USER_IT_PRIORITY 15U
+
+#endif

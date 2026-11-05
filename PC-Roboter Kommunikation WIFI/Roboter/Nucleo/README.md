@@ -44,10 +44,10 @@ Bei der NUCLEO-H753ZI ist USART3 mit dem ST-LINK Virtual COM Port verbunden:
 
 | ESP32 | Nucleo-H753ZI |
 |---|---|
-| GPIO4 / UART1 TX (ESP32-C6-Zero) | PD9 / USART3_RX |
+| GPIO4 / UART1 TX (ESP32-C6-Zero) | PB7 / USART1_RX |
 | GND | GND |
 
-Der ESP32 sendet mit 115200 Baud, 8N1 und 3,3-V-Logik. Verbinde TX mit RX, nicht TX mit TX. Der Nucleo-TX liegt an PD8/USART3_TX und ist mit dem ST-LINK-VCP verbunden. Der serielle Monitor muss auf 115200 Baud eingestellt sein.
+Der ESP32 sendet mit 115200 Baud, 8N1 und 3,3-V-Logik. Verbinde TX mit RX, nicht TX mit TX. USART3 (PD8/PD9) ist vollständig für den ST-LINK-VCP reserviert; verbinde den ESP-TX daher nicht mit PD8 oder PD9. USART1 empfängt die ESP32-Daten an PB7, während die Monitor-Ausgabe weiter über USART3 läuft. Der serielle Monitor muss auf 115200 Baud eingestellt sein.
 
 1. Trage WLAN-Zugangsdaten und `ROBOT_ID` in `../ESP32/ESP32.ino` ein und flashe den ESP32.
 2. Baue und flashe dieses Projekt mit dem ST-LINK.
@@ -61,8 +61,8 @@ Der ESP32 sendet mit 115200 Baud, 8N1 und 3,3-V-Logik. Verbinde TX mit RX, nicht
 Erwartete Anzeige:
 
 ```text
-Nucleo-H753ZI bereit; warte auf ESP32-Daten (USART3 115200 8N1)
+Nucleo-H753ZI bereit; ESP32 RX: USART1/PB7, Monitor: USART3 115200 8N1
 ID 0: vx=0.500 m/s, vy=-0.200 m/s, omega=0.100 rad/s
 ```
 
-Die UART-Initialisierung, Taktkonfiguration und HAL-Interrupt-Anbindung stehen in [`Core/Src/main.c`](./Core/Src/main.c); der zeilenorientierte UART-Empfänger ist in [`Core/Src/nucleo_receiver.c`](./Core/Src/nucleo_receiver.c).
+Die serielle Konsole wird wie im funktionierenden Motorentest über die Nucleo-BSP (`BSP_COM_Init(COM1, ...)`, USART3-Oversampling 8) initialisiert. Die separate USART1-RX-Schnittstelle für den ESP32 verwendet PB7. Die Taktkonfiguration und HAL-Interrupt-Anbindung stehen in [`Core/Src/main.c`](./Core/Src/main.c); der zeilenorientierte UART-Empfänger ist in [`Core/Src/nucleo_receiver.c`](./Core/Src/nucleo_receiver.c).

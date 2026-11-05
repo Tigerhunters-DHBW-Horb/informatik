@@ -6,6 +6,7 @@
 #define HAL_DMA_MODULE_ENABLED
 #define HAL_FLASH_MODULE_ENABLED
 #define HAL_GPIO_MODULE_ENABLED
+#define HAL_EXTI_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED
 #define HAL_PWR_EX_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
@@ -74,6 +75,9 @@
 #endif
 #ifdef HAL_GPIO_MODULE_ENABLED
 #include "stm32h7xx_hal_gpio.h"
+#endif
+#ifdef HAL_EXTI_MODULE_ENABLED
+#include "stm32h7xx_hal_exti.h"
 #endif
 #ifdef HAL_CORTEX_MODULE_ENABLED
 #include "stm32h7xx_hal_cortex.h"

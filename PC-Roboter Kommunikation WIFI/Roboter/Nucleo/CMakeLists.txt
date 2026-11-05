@@ -22,6 +22,7 @@ endif()
 set(CMSIS_DIR "${STM32CUBE_H7_PATH}/Drivers/CMSIS")
 set(DEVICE_DIR "${CMSIS_DIR}/Device/ST/STM32H7xx")
 set(HAL_DIR "${STM32CUBE_H7_PATH}/Drivers/STM32H7xx_HAL_Driver")
+set(BSP_DIR "${STM32CUBE_H7_PATH}/Drivers/BSP/STM32H7xx_Nucleo")
 set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/STM32H753ZITX_FLASH.ld")
 
 find_program(STM32_PROGRAMMER_CLI
@@ -35,6 +36,7 @@ set(HAL_SOURCES
   "${HAL_DIR}/Src/stm32h7xx_hal_cortex.c"
   "${HAL_DIR}/Src/stm32h7xx_hal_dma.c"
   "${HAL_DIR}/Src/stm32h7xx_hal_dma_ex.c"
+  "${HAL_DIR}/Src/stm32h7xx_hal_exti.c"
   "${HAL_DIR}/Src/stm32h7xx_hal_flash.c"
   "${HAL_DIR}/Src/stm32h7xx_hal_flash_ex.c"
   "${HAL_DIR}/Src/stm32h7xx_hal_gpio.c"
@@ -49,6 +51,7 @@ set(HAL_SOURCES
 add_executable(nucleo_h753zi_receiver.elf
   Core/Src/main.c
   Core/Src/nucleo_receiver.c
+  "${BSP_DIR}/stm32h7xx_nucleo.c"
   "${DEVICE_DIR}/Source/Templates/system_stm32h7xx.c"
   "${DEVICE_DIR}/Source/Templates/gcc/startup_stm32h753xx.s"
   ${HAL_SOURCES}
@@ -60,6 +63,7 @@ target_include_directories(nucleo_h753zi_receiver.elf PRIVATE
   "${DEVICE_DIR}/Include"
   "${HAL_DIR}/Inc"
   "${HAL_DIR}/Inc/Legacy"
+  "${BSP_DIR}"
 )
 
 target_compile_definitions(nucleo_h753zi_receiver.elf PRIVATE

@@ -33,15 +33,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  14 .debug_macro  00038c9e  00000000  00000000  000268e7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_line   000178d2  00000000  00000000  0005f585  2**0
+ 15 .debug_line   00017807  00000000  00000000  0005f585  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    00169579  00000000  00000000  00076e57  2**0
+ 16 .debug_str    00169510  00000000  00000000  00076d8c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000043  00000000  00000000  001e03d0  2**0
+ 17 .comment      00000043  00000000  00000000  001e029c  2**0
                   CONTENTS, READONLY
- 18 .debug_frame  00004ddc  00000000  00000000  001e0414  2**2
+ 18 .debug_frame  00004ddc  00000000  00000000  001e02e0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_line_str 00000091  00000000  00000000  001e51f0  2**0
+ 19 .debug_line_str 0000007f  00000000  00000000  001e50bc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -3884,23 +3884,44 @@ void EXTI15_10_IRQHandler(void)
  8001b76:	bd80      	pop	{r7, pc}
 
 08001b78 <_sbrk>:
+ *
+ * @param incr Memory size
+ * @return Pointer to allocated memory
+ */
+void *_sbrk(ptrdiff_t incr)
+{
  8001b78:	b580      	push	{r7, lr}
  8001b7a:	b086      	sub	sp, #24
  8001b7c:	af00      	add	r7, sp, #0
  8001b7e:	6078      	str	r0, [r7, #4]
+  extern uint8_t _end; /* Symbol defined in the linker script */
+  extern uint8_t _estack; /* Symbol defined in the linker script */
+  extern uint32_t _Min_Stack_Size; /* Symbol defined in the linker script */
+  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
  8001b80:	4a14      	ldr	r2, [pc, #80]	@ (8001bd4 <_sbrk+0x5c>)
  8001b82:	4b15      	ldr	r3, [pc, #84]	@ (8001bd8 <_sbrk+0x60>)
  8001b84:	1ad3      	subs	r3, r2, r3
  8001b86:	617b      	str	r3, [r7, #20]
+  const uint8_t *max_heap = (uint8_t *)stack_limit;
  8001b88:	697b      	ldr	r3, [r7, #20]
  8001b8a:	613b      	str	r3, [r7, #16]
+  uint8_t *prev_heap_end;
+
+  /* Initialize heap end at first call */
+  if (NULL == __sbrk_heap_end)
  8001b8c:	4b13      	ldr	r3, [pc, #76]	@ (8001bdc <_sbrk+0x64>)
  8001b8e:	681b      	ldr	r3, [r3, #0]
  8001b90:	2b00      	cmp	r3, #0
  8001b92:	d102      	bne.n	8001b9a <_sbrk+0x22>
+  {
+    __sbrk_heap_end = &_end;
  8001b94:	4b11      	ldr	r3, [pc, #68]	@ (8001bdc <_sbrk+0x64>)
  8001b96:	4a12      	ldr	r2, [pc, #72]	@ (8001be0 <_sbrk+0x68>)
  8001b98:	601a      	str	r2, [r3, #0]
+  }
+
+  /* Protect heap from growing into the reserved MSP stack */
+  if (__sbrk_heap_end + incr > max_heap)
  8001b9a:	4b10      	ldr	r3, [pc, #64]	@ (8001bdc <_sbrk+0x64>)
  8001b9c:	681a      	ldr	r2, [r3, #0]
  8001b9e:	687b      	ldr	r3, [r7, #4]
@@ -3908,22 +3929,32 @@ void EXTI15_10_IRQHandler(void)
  8001ba2:	693a      	ldr	r2, [r7, #16]
  8001ba4:	429a      	cmp	r2, r3
  8001ba6:	d207      	bcs.n	8001bb8 <_sbrk+0x40>
+  {
+    errno = ENOMEM;
  8001ba8:	f006 f860 	bl	8007c6c <__errno>
  8001bac:	4603      	mov	r3, r0
  8001bae:	220c      	movs	r2, #12
  8001bb0:	601a      	str	r2, [r3, #0]
+    return (void *)-1;
  8001bb2:	f04f 33ff 	mov.w	r3, #4294967295	@ 0xffffffff
  8001bb6:	e009      	b.n	8001bcc <_sbrk+0x54>
+  }
+
+  prev_heap_end = __sbrk_heap_end;
  8001bb8:	4b08      	ldr	r3, [pc, #32]	@ (8001bdc <_sbrk+0x64>)
  8001bba:	681b      	ldr	r3, [r3, #0]
  8001bbc:	60fb      	str	r3, [r7, #12]
+  __sbrk_heap_end += incr;
  8001bbe:	4b07      	ldr	r3, [pc, #28]	@ (8001bdc <_sbrk+0x64>)
  8001bc0:	681a      	ldr	r2, [r3, #0]
  8001bc2:	687b      	ldr	r3, [r7, #4]
  8001bc4:	4413      	add	r3, r2
  8001bc6:	4a05      	ldr	r2, [pc, #20]	@ (8001bdc <_sbrk+0x64>)
  8001bc8:	6013      	str	r3, [r2, #0]
+
+  return (void *)prev_heap_end;
  8001bca:	68fb      	ldr	r3, [r7, #12]
+}
  8001bcc:	4618      	mov	r0, r3
  8001bce:	3718      	adds	r7, #24
  8001bd0:	46bd      	mov	sp, r7
@@ -4216,47 +4247,106 @@ void ExitRun0Mode(void)
  8001d50:	58024800 	.word	0x58024800
 
 08001d54 <Reset_Handler>:
+
+    .section  .text.Reset_Handler
+  .weak  Reset_Handler
+  .type  Reset_Handler, %function
+Reset_Handler:
+  ldr   sp, =_estack      /* set stack pointer */
  8001d54:	f8df d038 	ldr.w	sp, [pc, #56]	@ 8001d90 <LoopFillZerobss+0xe>
+
+/* Call the ExitRun0Mode function to configure the power supply */
+  bl  ExitRun0Mode
  8001d58:	f7ff ffe4 	bl	8001d24 <ExitRun0Mode>
+/* Call the clock system initialization function.*/
+  bl  SystemInit
  8001d5c:	f7ff ff42 	bl	8001be4 <SystemInit>
+
+/* Copy the data segment initializers from flash to SRAM */
+  ldr r0, =_sdata
  8001d60:	480c      	ldr	r0, [pc, #48]	@ (8001d94 <LoopFillZerobss+0x12>)
+  ldr r1, =_edata
  8001d62:	490d      	ldr	r1, [pc, #52]	@ (8001d98 <LoopFillZerobss+0x16>)
+  ldr r2, =_sidata
  8001d64:	4a0d      	ldr	r2, [pc, #52]	@ (8001d9c <LoopFillZerobss+0x1a>)
+  movs r3, #0
  8001d66:	2300      	movs	r3, #0
+  b LoopCopyDataInit
  8001d68:	e002      	b.n	8001d70 <LoopCopyDataInit>
 
 08001d6a <CopyDataInit>:
+
+CopyDataInit:
+  ldr r4, [r2, r3]
  8001d6a:	58d4      	ldr	r4, [r2, r3]
+  str r4, [r0, r3]
  8001d6c:	50c4      	str	r4, [r0, r3]
+  adds r3, r3, #4
  8001d6e:	3304      	adds	r3, #4
 
 08001d70 <LoopCopyDataInit>:
+
+LoopCopyDataInit:
+  adds r4, r0, r3
  8001d70:	18c4      	adds	r4, r0, r3
+  cmp r4, r1
  8001d72:	428c      	cmp	r4, r1
+  bcc CopyDataInit
  8001d74:	d3f9      	bcc.n	8001d6a <CopyDataInit>
+/* Zero fill the bss segment. */
+  ldr r2, =_sbss
  8001d76:	4a0a      	ldr	r2, [pc, #40]	@ (8001da0 <LoopFillZerobss+0x1e>)
+  ldr r4, =_ebss
  8001d78:	4c0a      	ldr	r4, [pc, #40]	@ (8001da4 <LoopFillZerobss+0x22>)
+  movs r3, #0
  8001d7a:	2300      	movs	r3, #0
+  b LoopFillZerobss
  8001d7c:	e001      	b.n	8001d82 <LoopFillZerobss>
 
 08001d7e <FillZerobss>:
+
+FillZerobss:
+  str  r3, [r2]
  8001d7e:	6013      	str	r3, [r2, #0]
+  adds r2, r2, #4
  8001d80:	3204      	adds	r2, #4
 
 08001d82 <LoopFillZerobss>:
+
+LoopFillZerobss:
+  cmp r2, r4
  8001d82:	42a2      	cmp	r2, r4
+  bcc FillZerobss
  8001d84:	d3fb      	bcc.n	8001d7e <FillZerobss>
+
+/* Call static constructors */
+    bl __libc_init_array
  8001d86:	f005 ff77 	bl	8007c78 <__libc_init_array>
+/* Call the application's entry point.*/
+  bl  main
  8001d8a:	f7fe fc8f 	bl	80006ac <main>
+  bx  lr
  8001d8e:	4770      	bx	lr
+  ldr   sp, =_estack      /* set stack pointer */
  8001d90:	24080000 	.word	0x24080000
+  ldr r0, =_sdata
  8001d94:	24000000 	.word	0x24000000
+  ldr r1, =_edata
  8001d98:	2400007c 	.word	0x2400007c
+  ldr r2, =_sidata
  8001d9c:	0800888c 	.word	0x0800888c
+  ldr r2, =_sbss
  8001da0:	2400007c 	.word	0x2400007c
+  ldr r4, =_ebss
  8001da4:	240003e0 	.word	0x240003e0
 
 08001da8 <ADC3_IRQHandler>:
+ * @retval None
+*/
+    .section  .text.Default_Handler,"ax",%progbits
+Default_Handler:
+Infinite_Loop:
+  b  Infinite_Loop
  8001da8:	e7fe      	b.n	8001da8 <ADC3_IRQHandler>
 	...
 

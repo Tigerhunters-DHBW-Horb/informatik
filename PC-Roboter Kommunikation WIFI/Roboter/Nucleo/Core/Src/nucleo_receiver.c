@@ -9,6 +9,7 @@
 #define UART_TIMEOUT_MS 100U
 
 static UART_HandleTypeDef *receiver_uart;
+static UART_HandleTypeDef *console_uart;
 static uint8_t rx_byte;
 static uint8_t rx_ring[RX_RING_SIZE];
 static volatile uint16_t rx_head;
@@ -87,11 +88,11 @@ static int parse_unsigned(const char **cursor, unsigned int *result)
 
 static void send_text(const char *text)
 {
-  if (receiver_uart == NULL) {
+  if (console_uart == NULL) {
     return;
   }
 
-  (void)HAL_UART_Transmit(receiver_uart, (uint8_t *)text,
+  (void)HAL_UART_Transmit(console_uart, (uint8_t *)text,
                           (uint16_t)strlen(text), UART_TIMEOUT_MS);
 }
 
@@ -144,13 +145,15 @@ static void process_line(const char *input)
   send_text(output);
 }
 
-HAL_StatusTypeDef NucleoReceiver_Init(UART_HandleTypeDef *uart)
+HAL_StatusTypeDef NucleoReceiver_Init(UART_HandleTypeDef *rx_uart,
+                                      UART_HandleTypeDef *tx_uart)
 {
-  if (uart == NULL) {
+  if (rx_uart == NULL || tx_uart == NULL) {
     return HAL_ERROR;
   }
 
-  receiver_uart = uart;
+  receiver_uart = rx_uart;
+  console_uart = tx_uart;
   rx_head = 0U;
   rx_tail = 0U;
   rx_overflow = 0U;

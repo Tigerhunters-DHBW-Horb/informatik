@@ -3,7 +3,8 @@
 
 #include "stm32h7xx_hal.h"
 
-HAL_StatusTypeDef NucleoReceiver_Init(UART_HandleTypeDef *uart);
+HAL_StatusTypeDef NucleoReceiver_Init(UART_HandleTypeDef *rx_uart,
+                                      UART_HandleTypeDef *tx_uart);
 void NucleoReceiver_Poll(void);
 void NucleoReceiver_RxCpltCallback(UART_HandleTypeDef *uart);
 void NucleoReceiver_ErrorCallback(UART_HandleTypeDef *uart);

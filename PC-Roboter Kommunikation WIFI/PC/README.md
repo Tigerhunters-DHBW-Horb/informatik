@@ -17,9 +17,19 @@ python3 udp_sender.py \
 
 Die Broadcast-Adresse hängt vom Betriebssystem und der Konfiguration des PC-Hotspots ab. `255.255.255.255` ist der Standard; falls der Hotspot diesen begrenzten Broadcast nicht weiterleitet, gib mit `--broadcast` die Broadcast-Adresse des Hotspot-Subnetzes an. Erlaube gegebenenfalls ausgehende UDP-Pakete über den konfigurierten Port (Standard `4210`) in der Firewall.
 
-Der ESP32 leitet den Befehl für seine konfigurierte Roboter-ID per UART an den Nucleo-H753ZI weiter. Die Werte sind Fahrbefehle (`vx`, `vy`, `omega`), keine Positionsdaten aus SSL-Vision. CubeIDE-Einrichtung, Verdrahtung und serielle Anzeige sind in [`../Roboter/Nucleo/README.md`](../Roboter/Nucleo/README.md) beschrieben.
+Der ESP32 leitet den Befehl für seine konfigurierte Roboter-ID per UART an den Nucleo-H753ZI weiter. Die Werte sind Fahrbefehle (`vx`, `vy`, `omega`), keine Positionsdaten aus SSL-Vision. Die NUCLEO-Firmware mit integrierter Motorsteuerung, Verdrahtung und Inbetriebnahme ist in [`../Roboter/Microcontroller_NUCLEO_Programm_Zusammenführung/README.md`](../Roboter/Microcontroller_NUCLEO_Programm_Zusammenführung/README.md) beschrieben.
 
 Mit `--rate 100` lässt sich die Senderate auf 100 Pakete pro Sekunde setzen. `--once` sendet einen einzelnen Testdatensatz. Beim Beenden mit STRG+C wird für alle angegebenen IDs noch ein Stoppbefehl gesendet.
+
+## Steuerung mit grafischer Oberfläche
+
+Für manuelle Fahrbefehle kann alternativ die Tkinter-Oberfläche gestartet werden:
+
+```bash
+python3 udp_control_ui.py
+```
+
+Trage Broadcast-IP, UDP-Port und Roboter-ID ein und starte die Steuerung. Halte die Schaltflächen oder Tasten gedrückt, um Bewegungsbefehle zu senden: `W`/`S` steuern `VX`, `A`/`D` steuern `VY`, und `Q`/`E` steuern `OMEGA`. Lineare und Drehgeschwindigkeit lassen sich über die Schieberegler begrenzen. `Esc` oder die Schaltfläche „Stopp“ sendet einen Nullbefehl und beendet die Übertragung; beim Schließen des Fensters wird ebenfalls gestoppt. Tkinter ist Teil der Python-Standardbibliothek.
 
 ## Protokollversion 1
 
