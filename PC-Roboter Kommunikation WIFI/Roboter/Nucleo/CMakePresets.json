@@ -9,8 +9,8 @@
     {
       "name": "nucleo-h753zi",
       "displayName": "NUCLEO-H753ZI (STM32Cube/CMake)",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build-unix-makefiles",
       "toolchainFile": "${sourceDir}/cmake/arm-none-eabi.cmake"
     }
   ],

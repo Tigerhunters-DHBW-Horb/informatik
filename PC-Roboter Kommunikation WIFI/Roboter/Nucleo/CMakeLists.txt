@@ -9,6 +9,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(STM32CUBE_H7_PATH "$ENV{STM32CUBE_H7_PATH}" CACHE PATH
     "Root directory of the STM32CubeH7 firmware package")
+if(NOT STM32CUBE_H7_PATH AND DEFINED ENV{STM32CUBE_H7_PATH})
+  set(STM32CUBE_H7_PATH "$ENV{STM32CUBE_H7_PATH}" CACHE PATH
+      "Root directory of the STM32CubeH7 firmware package" FORCE)
+endif()
 if(NOT STM32CUBE_H7_PATH OR
    NOT EXISTS "${STM32CUBE_H7_PATH}/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c")
   message(FATAL_ERROR
@@ -19,6 +23,12 @@ set(CMSIS_DIR "${STM32CUBE_H7_PATH}/Drivers/CMSIS")
 set(DEVICE_DIR "${CMSIS_DIR}/Device/ST/STM32H7xx")
 set(HAL_DIR "${STM32CUBE_H7_PATH}/Drivers/STM32H7xx_HAL_Driver")
 set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/STM32H753ZITX_FLASH.ld")
+
+find_program(STM32_PROGRAMMER_CLI
+  NAMES STM32_Programmer_CLI
+  REQUIRED
+  DOC "Path to STM32CubeProgrammer command-line executable"
+)
 
 set(HAL_SOURCES
   "${HAL_DIR}/Src/stm32h7xx_hal.c"
@@ -87,7 +97,7 @@ set_target_properties(nucleo_h753zi_receiver.elf PROPERTIES
 )
 
 add_custom_target(flash
-  COMMAND STM32_Programmer_CLI -c port=SWD -w
+  COMMAND "${STM32_PROGRAMMER_CLI}" -c port=SWD -w
           "$<TARGET_FILE:nucleo_h753zi_receiver.elf>" -v -rst
   DEPENDS nucleo_h753zi_receiver.elf
   USES_TERMINAL

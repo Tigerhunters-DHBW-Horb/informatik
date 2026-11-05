@@ -14,15 +14,19 @@ RBT1,<ID>,<vx>,<vy>,<omega>\n
 
 1. Öffne diesen `Nucleo`-Ordner in VS Code. Empfohlen sind die Erweiterungen **STM32CubeIDE for Visual Studio Code** und **CMake Tools**.
 2. Installiere über die ST-Erweiterung die CLI-Tools **Arm GNU Toolchain** und **STM32CubeProgrammer**. Stelle sicher, dass `arm-none-eabi-gcc` und `STM32_Programmer_CLI` im VS-Code-Prozess über `PATH` erreichbar sind; starte VS Code nach einer Toolchain-Installation gegebenenfalls neu.
-3. Installiere das Firmware-Paket **STM32Cube FW_H7 V1.11.2** mit STM32CubeMX oder dem STM32Cube-Paketmanager.
-4. Setze `STM32CUBE_H7_PATH` auf den entpackten Paketordner, der den Unterordner `Drivers` enthält. Beispiel:
+3. Installiere das Firmware-Paket **STM32Cube FW_H7** mit STM32CubeMX oder dem STM32Cube-Paketmanager.
+4. Öffne ein Terminal im Nucleo-Projektordner und setze `STM32CUBE_H7_PATH` auf den entpackten Paketordner, der den Unterordner `Drivers` enthält. Falls lokale `PATH`-Einträge in einer `.profile` im Nucleo-Projektordner stehen, lade sie zuerst. Starte VS Code aus diesem Terminal, damit auch CMake Tools die Umgebungsvariablen erbt:
 
    ```bash
-   export STM32CUBE_H7_PATH="$HOME/STM32Cube/Repository/STM32Cube_FW_H7_V1.11.2"
+   source ./.profile # nur falls die lokale Datei vorhanden ist
+   export STM32CUBE_H7_PATH="$HOME/STM32Cube/Repository/STM32Cube_FW_H7_V1.12.1"
+   command -v arm-none-eabi-gcc
+   command -v STM32_Programmer_CLI
    code .
    ```
 
-   Alternativ kann der Pfad bei der CMake-Konfiguration mit `-DSTM32CUBE_H7_PATH=/absoluter/pfad/STM32Cube_FW_H7_V1.11.2` angegeben werden.
+   Passe Versionsnummer und Pfad an die installierte FW_H7-Version an. Alternativ kann der Pfad bei der CMake-Konfiguration mit `-DSTM32CUBE_H7_PATH=/absoluter/pfad/STM32Cube_FW_H7_V1.12.1` angegeben werden.
+   Beide `command -v`-Befehle müssen einen Pfad ausgeben. Das CMake-Preset verwendet Unix Makefiles und braucht daher kein separat installiertes Ninja.
 
 Das Projekt verwendet CMake Presets. Wähle in VS Code das Preset **NUCLEO-H753ZI (STM32Cube/CMake)** und konfiguriere/build es mit CMake Tools. Alternativ im Terminal dieses Ordners:
 
@@ -32,7 +36,7 @@ cmake --build --preset nucleo-h753zi
 cmake --build --preset nucleo-h753zi --target flash
 ```
 
-Das Flash-Ziel nutzt den ST-LINK über STM32CubeProgrammer. Der resultierende Build liegt unter `build/nucleo_h753zi_receiver.elf`. Der Nucleo wird nicht automatisch beim Build geflasht.
+Konfiguriere CMake erneut, nachdem du `source ./.profile` geladen hast; so kann CMake `STM32_Programmer_CLI` finden. Das Flash-Ziel nutzt den ST-LINK über den dabei gefundenen absoluten Programmer-Pfad. Der resultierende Build liegt unter `build-unix-makefiles/nucleo_h753zi_receiver.elf`. Der Nucleo wird nicht automatisch beim normalen Build geflasht.
 
 ## UART-Verbindung und Anzeige
 
