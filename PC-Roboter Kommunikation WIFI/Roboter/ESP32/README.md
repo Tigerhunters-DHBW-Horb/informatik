@@ -7,8 +7,8 @@ Dieses Arduino-Projekt verbindet sich als WLAN-Station mit dem PC-Hotspot und la
 3. Lade das Programm hoch und öffne den seriellen Monitor mit `115200` Baud.
 4. Starte den PC-Sender aus [`../../PC/README.md`](../../PC/README.md).
 
-Für Befehle mit der konfigurierten Roboter-ID gibt `onRobotCommand(vx, vy, omega)` die Werte auf dem USB-Seriell-Monitor aus und leitet sie zusätzlich über UART2 an den Nucleo-H753ZI weiter. Die UART-Zeile lautet `RBT1,<ID>,<vx>,<vy>,<omega>\n`; `VX` und `VY` sind in m/s, `OMEGA` in rad/s. Die UART läuft mit 115200 Baud, 8N1, TX auf ESP32-GPIO17 und RX auf GPIO16. Für die reine Weiterleitung wird nur TX benötigt.
+Für Befehle mit der konfigurierten Roboter-ID gibt `onRobotCommand(vx, vy, omega)` die Werte auf dem USB-Seriell-Monitor aus und leitet sie zusätzlich über UART1 an den Nucleo-H753ZI weiter. Die UART-Zeile lautet `RBT1,<ID>,<vx>,<vy>,<omega>\n`; `VX` und `VY` sind in m/s, `OMEGA` in rad/s. Für den Waveshare ESP32-C6-Zero läuft UART1 mit 115200 Baud, 8N1, TX auf GPIO4 und RX auf GPIO5. Für die reine Weiterleitung wird nur TX benötigt.
 
-Verbinde GPIO17 mit USART3_RX (PD9) am Nucleo und verbinde die Masseleitungen. Details zur Einrichtung des Nucleo-CMake-Projekts und zur Anzeige über den ST-LINK Virtual COM Port stehen in [`../Nucleo/README.md`](../Nucleo/README.md).
+Verbinde GPIO4 mit USART3_RX (PD9) am Nucleo und verbinde die Masseleitungen. Details zur Einrichtung des Nucleo-CMake-Projekts und zur Anzeige über den ST-LINK Virtual COM Port stehen in [`../Nucleo/README.md`](../Nucleo/README.md).
 
 Der PC muss den Hotspot aktiv halten. Die ESP32 erhalten ihre IP-Adresse per DHCP; für Broadcasts muss der Sender die passende Hotspot-Subnetzadresse verwenden, falls `255.255.255.255` nicht weitergeleitet wird. Als Test kann der PC-Sender auch direkt an die ESP32-IP senden.
