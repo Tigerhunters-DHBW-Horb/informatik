@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Nucleo: Build",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "--preset", "nucleo-h753zi"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Nucleo: Flash via ST-LINK",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "--preset", "nucleo-h753zi", "--target", "flash"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
