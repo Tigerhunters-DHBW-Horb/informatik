@@ -29,7 +29,34 @@ Für manuelle Fahrbefehle kann alternativ die Tkinter-Oberfläche gestartet werd
 python3 udp_control_ui.py
 ```
 
-Trage Broadcast-IP, UDP-Port und Roboter-ID ein und starte die Steuerung. Halte die Schaltflächen oder Tasten gedrückt, um Bewegungsbefehle zu senden: `W`/`S` steuern `VX`, `A`/`D` steuern `VY`, und `Q`/`E` steuern `OMEGA`. Lineare und Drehgeschwindigkeit lassen sich über die Schieberegler begrenzen. `Esc` oder die Schaltfläche „Stopp“ sendet einen Nullbefehl und beendet die Übertragung; beim Schließen des Fensters wird ebenfalls gestoppt. Tkinter ist Teil der Python-Standardbibliothek.
+Trage Broadcast-IP, UDP-Port und Roboter-ID in der Oberfläche ein und starte
+die Steuerung. Halte die Schaltflächen oder Tasten gedrückt, um Bewegungsbefehle
+zu senden: `W`/`S` steuern `VX`, `A`/`D` steuern `VY`, und `Q`/`E` steuern
+`OMEGA`. Lineare und Drehgeschwindigkeit lassen sich über die Schieberegler
+begrenzen. `Esc` oder „Stopp“ sendet einen Nullbefehl und beendet die
+Übertragung; beim Schließen des Fensters wird ebenfalls gestoppt.
+
+## Steuerung mit Bluetooth-Xbox-Controller
+
+Die Controller-Steuerung ist ein eigenes Programm, die Tastatur-Oberfläche
+`udp_control_ui.py` bleibt unverändert:
+
+```bash
+python3 -m pip install -r requirements.txt
+python3 udp_gamepad_control_ui.py
+```
+
+Kopple den Xbox-Controller in den Bluetooth-Einstellungen des PCs. Das neue
+Fenster enthält eine gezeichnete Live-Ansicht des Controllers: Stickpositionen,
+Triggerfüllstände und gedrückte Fronttasten werden laufend aktualisiert. Der
+linke Stick steuert Vor-/Rückwärts- und Seitwärtsbewegungen; der rechte Stick
+steuert die Drehung. LT aktiviert den einstellbaren Schleichfaktor, RT den
+Sprintfaktor; Schleichen hat Vorrang, wenn beide Trigger gedrückt sind.
+Normalgeschwindigkeit, Drehgeschwindigkeit sowie Sprint- und Schleichfaktor
+lassen sich im Fenster einstellen. Die lineare Geschwindigkeit ist auf die
+Firmware-Grenze von 0,5 m/s begrenzt. Ohne verbundenen Controller zeigt das
+Fenster den Verbindungsstatus an und sendet bei aktiver Steuerung Stoppbefehle.
+`Esc` oder „Stopp“ beendet die Übertragung mit einem Nullbefehl.
 
 ## Protokollversion 1
 
