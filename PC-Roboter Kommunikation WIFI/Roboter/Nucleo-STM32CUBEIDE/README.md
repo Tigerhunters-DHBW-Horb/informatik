@@ -34,7 +34,7 @@ initialization are preserved.
 
 | ESP32-C6-Zero | NUCLEO-H753ZI |
 |---|---|
-| GPIO4 / UART1 TX | PB7 / USART1_RX |
+| GPIO2 / UART1 TX | PB7 / USART1_RX |
 | GND | GND |
 
 PD8 / USART3_TX and PD9 / USART3_RX are connected to the ST-LINK VCP. Do not

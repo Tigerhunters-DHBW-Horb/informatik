@@ -27,6 +27,7 @@
                                       /* erst auf 1 wenn I2C2 verifiziert!)  */
 #define CFG_ENABLE_LOG            1   /* UART-Statusausgabe ueber VCP        */
                                       /* 0 = aus (linkt ohne USART)          */
+#define CFG_ENABLE_HALL_SAMPLING  1U  /* TIM6 Hall-Abtastung mit 20 kHz        */
 
 /* ==========================================================================
  * HALL-SENSOREN / DREHZAHLREGELUNG

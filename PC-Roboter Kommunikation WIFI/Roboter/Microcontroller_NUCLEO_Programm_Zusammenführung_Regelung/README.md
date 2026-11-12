@@ -24,7 +24,7 @@ PC-Python --UDP/Broadcast--> ESP32 --UART1, 115200 8N1--> NUCLEO-H753ZI
 
 | ESP32-C6-Zero | NUCLEO-H753ZI |
 |---|---|
-| UART1 TX, GPIO4 | USART1_RX, PB7 |
+| UART1 TX, GPIO2 | USART1_RX, PB7 |
 | GND | GND |
 
 Nur die ESP32-TX-Leitung ist fuer die Weiterleitung erforderlich. USART3
@@ -52,7 +52,7 @@ Pull-up. Gemeinsame Masse zwischen Motorversorgung und NUCLEO sicherstellen.
 1. `ESP32.ino` in der Arduino IDE oeffnen. WLAN-SSID und Passwort muessen zum
    PC-Hotspot passen; `ROBOT_ID` muss der NUCLEO-Konfiguration
    `REMOTE_ROBOT_ID` entsprechen (Vorgabe: `0`).
-2. ESP32-Firmware laden und den ESP32 mit GPIO4/PB7 sowie gemeinsamer Masse
+2. ESP32-Firmware laden und den ESP32 mit GPIO2/PB7 sowie gemeinsamer Masse
    verbinden.
 3. Diesen Ordner in STM32CubeIDE als vorhandenes Projekt importieren. Debug
    bauen und auf die NUCLEO-H753ZI flashen.

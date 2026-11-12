@@ -61,8 +61,8 @@ all: main-build
 main-build: Board\ NUCLEO-H753ZI.elf secondary-outputs
 
 # Tool invocations
-Board\ NUCLEO-H753ZI.elf Board\ NUCLEO-H753ZI.map: $(OBJS) $(USER_OBJS) /home/ssl/Documents/github/informatik/PC-Roboter\ Kommunikation\ WIFI/Roboter/Microcontroller_NUCLEO_Programm_Zusammenführung/STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Board NUCLEO-H753ZI.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"/home/ssl/Documents/github/informatik/PC-Roboter Kommunikation WIFI/Roboter/Microcontroller_NUCLEO_Programm_Zusammenführung/STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Board NUCLEO-H753ZI.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Board\ NUCLEO-H753ZI.elf Board\ NUCLEO-H753ZI.map: $(OBJS) $(USER_OBJS) /home/ssl/Documents/github/informatik/PC-Roboter\ Kommunikation\ WIFI/Roboter/Microcontroller_NUCLEO_Programm_Zusammenführung_Regelung/STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Board NUCLEO-H753ZI.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"/home/ssl/Documents/github/informatik/PC-Roboter Kommunikation WIFI/Roboter/Microcontroller_NUCLEO_Programm_Zusammenführung_Regelung/STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Board NUCLEO-H753ZI.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

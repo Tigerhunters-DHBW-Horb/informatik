@@ -75,7 +75,7 @@ python KF_Ball.py
 python KF_Roboter.py
 ```
 
-`test_receiver.py` prueft den Vision-Empfang und zeigt erkannte Objekte an. `vision_terminal.py` gibt alle empfangenen SSL-Vision-Pakete als Text aus. Beide Programme verwenden standardmaessig Multicast `224.5.23.2` auf UDP-Port `10006`. `test_sender.py` und `steuerung.py` senden direkt Fahrbefehle an die jeweils in der Datei konfigurierte IP-Adresse; diese IP-Adressen muessen gegebenenfalls unabhaengig von `main.py` angepasst werden. `KF_Ball.py` und `KF_Roboter.py` zeigen die jeweiligen Filter-Simulationen als Plot.
+`test_receiver.py` prueft den Vision-Empfang und zeigt erkannte Objekte an. `vision_terminal.py` gibt alle empfangenen SSL-Vision-Pakete als Text aus. Beide Programme verwenden standardmaessig Multicast `224.5.23.2` auf UDP-Port `10006`. `test_sender.py` und `steuerung.py` senden Fahrbefehle an den Rechner mit grSim auf UDP-Port `20011` (standardmaessig `127.0.0.1`, wenn grSim auf demselben Rechner laeuft). Hier darf nicht die Vision-Multicast-Adresse `224.5.23.2` eingetragen werden. Bei einem Simulator auf einem anderen Rechner muss dessen erreichbare IP-Adresse unabhaengig von `main.py` konfiguriert werden. `KF_Ball.py` und `KF_Roboter.py` zeigen die jeweiligen Filter-Simulationen als Plot.
 
 ## Aktueller Entwicklungsstand
 

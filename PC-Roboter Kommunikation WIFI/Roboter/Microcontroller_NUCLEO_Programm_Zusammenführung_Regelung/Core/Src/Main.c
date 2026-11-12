@@ -20,6 +20,7 @@
 /* USER CODE BEGIN Includes */
 #include "motor_test.h"     /* unsere Testsequenz fuer die 4 Antriebs-ESCs */
 #include "nucleo_receiver.h"
+#include "test_config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,7 +60,9 @@ static void MX_GPIO_Init(void);
 static void MX_I2C2_SMBUS_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM3_Init(void);
+#if CFG_ENABLE_HALL_SAMPLING
 static void MX_TIM6_Init(void);
+#endif
 static void MX_TIM8_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
@@ -102,7 +105,9 @@ int main(void)
   MX_I2C2_SMBUS_Init();
   MX_TIM1_Init();
   MX_TIM3_Init();
+#if CFG_ENABLE_HALL_SAMPLING
   MX_TIM6_Init();
+#endif
   MX_TIM8_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
@@ -132,10 +137,12 @@ int main(void)
   }
 
   motor_test_init();
+#if CFG_ENABLE_HALL_SAMPLING
   if (HAL_TIM_Base_Start_IT(&htim6) != HAL_OK)
   {
     Error_Handler();
   }
+#endif
 
   static const uint8_t startup_message[] =
       "ESP32 RX: USART1/PB7, VCP: USART3 115200 8N1\r\n";
@@ -205,6 +212,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *uart)
   NucleoReceiver_ErrorCallback(uart);
 }
 
+#if CFG_ENABLE_HALL_SAMPLING
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *timer)
 {
   if (timer->Instance == TIM6)
@@ -212,6 +220,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *timer)
     motor_test_hall_sample();
   }
 }
+#endif
 
 /**
   * @brief System Clock Configuration
@@ -524,6 +533,7 @@ static void MX_TIM8_Init(void)
 {
 }
 
+#if CFG_ENABLE_HALL_SAMPLING
 static void MX_TIM6_Init(void)
 {
   htim6.Instance = TIM6;
@@ -538,9 +548,11 @@ static void MX_TIM6_Init(void)
     Error_Handler();
   }
 
-  HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 4U, 0U);
+  /* USART1 (Priority 5) muss die hochfrequente Hall-Abtastung preempten. */
+  HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 6U, 0U);
   HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
 }
+#endif
 
 /**
   * @brief GPIO Initialization Function

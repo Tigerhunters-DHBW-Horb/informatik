@@ -17,7 +17,8 @@ VM_IP = "127.0.0.1"
 ROBOTER_ID = 0
 TEAM_GELB = False   
 VISION_MULTICAST_IP = "224.5.23.2"
-VISION_PORT = 10006
+# VISION_PORT = 10006
+VISION_PORT = 10020
 
 
 SCHLEIFENZEIT = 0.05  # 
@@ -227,6 +228,7 @@ class LiveVisualisierung:
             )
             if self.fahrbefehl_pfeil is not None:
                 self.fahrbefehl_pfeil.remove()
+                self.fahrbefehl_pfeil = None
             speed = math.hypot(command_x, command_y)
             if speed > 0:
                 arrow_length = 1200.0 * min(speed / MAX_V_MMS, 1.0)

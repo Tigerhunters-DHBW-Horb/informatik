@@ -23,6 +23,8 @@ Dateien ins Projekt unter `Core/Src` bzw. `Core/Inc` kopieren.
 4. NUCLEO-Button PC13 → lokaler Teststart/Not-Aus; Status-LED PB0.
 5. *(optional)* **I2C2** (PF0/PF1) für INA226, falls Batteriemonitor genutzt.
 6. **TIM6** → Basistimer mit 20 kHz Update-Interrupt zur Hall-Abtastung.
+   Seine Interrupt-Prioritaet muss niedriger als USART1 sein, damit die
+   UART-Empfangsinterrupts die Hall-Abtastung unterbrechen koennen.
    TIM8 bleibt fuer die Dribbler-PWM reserviert.
 
 ## main.c
@@ -34,6 +36,8 @@ Dateien ins Projekt unter `Core/Src` bzw. `Core/Inc` kopieren.
 int main(void)
 {
   /* ... CubeMX-Inits (HAL_Init, Clock, MX_TIM1_Init, MX_TIM6_Init, ...) */
+  HAL_NVIC_SetPriority(USART1_IRQn, 5U, 0U);
+  HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 6U, 0U);
 
   /* USER CODE BEGIN 2 */
   motor_test_init();

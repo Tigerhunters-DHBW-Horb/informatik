@@ -44,7 +44,7 @@ Bei der NUCLEO-H753ZI ist USART3 mit dem ST-LINK Virtual COM Port verbunden:
 
 | ESP32 | Nucleo-H753ZI |
 |---|---|
-| GPIO4 / UART1 TX (ESP32-C6-Zero) | PB7 / USART1_RX |
+| GPIO2 / UART1 TX (ESP32-C6-Zero) | PB7 / USART1_RX |
 | GND | GND |
 
 Der ESP32 sendet mit 115200 Baud, 8N1 und 3,3-V-Logik. Verbinde TX mit RX, nicht TX mit TX. USART3 (PD8/PD9) ist vollständig für den ST-LINK-VCP reserviert; verbinde den ESP-TX daher nicht mit PD8 oder PD9. USART1 empfängt die ESP32-Daten an PB7, während die Monitor-Ausgabe weiter über USART3 läuft. Der serielle Monitor muss auf 115200 Baud eingestellt sein.
