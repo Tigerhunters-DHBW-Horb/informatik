@@ -10,22 +10,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'protos'))
 try:
     import ssl_vision_wrapper_pb2 as SSL_WrapperPacket
     import grSim_Packet_pb2 as grSim_Packet
-except ImportError as exc:
-    raise ImportError(
-        f"Protobuf-Import fehlgeschlagen: {exc}. "
-        'Installiere protobuf in der aktiven Umgebung mit: '
-        'python -m pip install "protobuf>=3.20"'
-    ) from exc
+except ImportError:
+    print("Fehler: Protobuf-Dateien nicht gefunden!")
 
 
 class KommunikationGrSim:
-    def __init__(
-        self,
-        vm_ip,
-        vision_port=10006,
-        command_port=20011,
-        vision_multicast_ip="224.5.23.2"
-    ):
+    def __init__(self, vm_ip, vision_port=10020, command_port=20011):
         self.vm_ip = vm_ip
 
         # Vision-Empfänger Multicast
@@ -40,9 +30,9 @@ class KommunikationGrSim:
         self.recv_sock.setblocking(False)
 
         mreq = struct.pack(
-            "=4s4s",
-            socket.inet_aton(vision_multicast_ip),
-            socket.inet_aton("0.0.0.0")
+            "4sl",
+            socket.inet_aton("224.5.23.2"),
+            socket.INADDR_ANY
         )
 
         self.recv_sock.setsockopt(
@@ -55,8 +45,8 @@ class KommunikationGrSim:
         self.send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.grsim_addr = (self.vm_ip, command_port)
 
-        print("Kommunikation bereit.")
-        print(f"SSL-Vision Multicast: {vision_multicast_ip}:{vision_port}")
+        print(f"Kommunikation bereit.")
+        print(f"Vision-Port: {vision_port}")
         print(f"Command-Ziel: {self.vm_ip}:{command_port}")
 
     def empfange_paket(self):

@@ -11,8 +11,9 @@ import grSim_Packet_pb2 as grSim_Packet
 
 
 # --- Konfiguration ---
-# Adresse des Rechners, auf dem grSim laeuft (nicht die Vision-Multicast-Adresse).
+# VM_IP = "192.168.0.115"
 VM_IP = "127.0.0.1"
+#VM_IP =  "192.168.42.41"
 GRSIM_COMMAND_PORT = 20011
 
 TEAM_GELB = True

@@ -7,7 +7,8 @@ from WeltModell import WeltModell
 
 # --- Konfiguration ---
 # VM_IP = "192.168.0.104"
-VM_IP =  "192.168.42.41"
+#VM_IP =  "192.168.42.41"
+VM_IP = "127.0.0.1"
 ROBOTER_ID = 1
 TEAM_GELB = True
 

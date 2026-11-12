@@ -14,9 +14,7 @@ import grSim_Packet_pb2 as grSim_Packet
 # --- Konfiguration ---
 #VM_IP = "192.168.0.104"       # IP deiner Linux-VM --> Zuhause
 #VM_IP =  "192.168.42.41"        # IP deiner Linux-VM --> VM auf eigenn pc Hohenberg
-# VM_IP =  "192.168.95.255"       # IP deiner Linux-VM --> VM auf Ubuntu PC Hohenberg
-VM_IP =  "127.0.0.1"
-
+VM_IP =  "192.168.95.255"       # IP deiner Linux-VM --> VM auf Ubuntu PC Hohenberg
 GRSIM_COMMAND_PORT = 20011    # grSim Command-Port
 
 TEAM_GELB = True              # True = Gelb, False = Blau
