@@ -1,0 +1,10 @@
+../Core/Src/motor_test.c:70:13:test_log	3
+../Core/Src/motor_test.c:101:16:button_pressed_edge	6
+../Core/Src/motor_test.c:132:13:led_set	2
+../Core/Src/motor_test.c:150:13:led_blink	2
+../Core/Src/motor_test.c:253:13:apply_val	3
+../Core/Src/motor_test.c:280:13:all_stop_safe	1
+../Core/Src/motor_test.c:290:16:run_segments	5
+../Core/Src/motor_test.c:343:6:motor_test_init	2
+../Core/Src/motor_test.c:369:6:motor_test_remote_command	11
+../Core/Src/motor_test.c:422:6:motor_test_run	25

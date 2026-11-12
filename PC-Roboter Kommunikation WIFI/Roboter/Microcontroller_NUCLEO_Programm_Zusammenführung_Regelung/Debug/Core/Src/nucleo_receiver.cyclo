@@ -1,0 +1,8 @@
+../Core/Src/nucleo_receiver.c:26:12:parse_decimal	12
+../Core/Src/nucleo_receiver.c:73:12:parse_unsigned	5
+../Core/Src/nucleo_receiver.c:101:13:send_text	2
+../Core/Src/nucleo_receiver.c:110:13:process_line	13
+../Core/Src/nucleo_receiver.c:138:19:NucleoReceiver_Init	3
+../Core/Src/nucleo_receiver.c:159:6:NucleoReceiver_RxCpltCallback	4
+../Core/Src/nucleo_receiver.c:183:6:NucleoReceiver_ErrorCallback	2
+../Core/Src/nucleo_receiver.c:191:6:NucleoReceiver_Poll	13
