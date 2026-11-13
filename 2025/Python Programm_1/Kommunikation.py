@@ -3,6 +3,9 @@ import struct
 import sys
 import os
 import time
+from collections import deque
+
+from google.protobuf.message import DecodeError
 
 # Protobuf Pfad setzen
 sys.path.append(os.path.join(os.path.dirname(__file__), 'protos'))
@@ -40,6 +43,8 @@ class KommunikationGrSim:
             socket.IP_ADD_MEMBERSHIP,
             mreq
         )
+        self._cached_geometry = None
+        self._grosses_paket_eingelesen = False
 
         # Befehls-Sender Unicast
         self.send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -50,21 +55,125 @@ class KommunikationGrSim:
         print(f"Command-Ziel: {self.vm_ip}:{command_port}")
 
     def empfange_paket(self):
-        try:
-            data, addr = self.recv_sock.recvfrom(65536)
+        positionspakete = deque(maxlen=4)
 
+        while True:
+            try:
+                data, _ = self.recv_sock.recvfrom(65536)
+            except BlockingIOError:
+                break
+
+            if len(data) > 1000:
+                if not self._grosses_paket_eingelesen:
+                    packet = SSL_WrapperPacket.SSL_WrapperPacket()
+                    try:
+                        packet.ParseFromString(data)
+                    except DecodeError as exc:
+                        print(
+                            f"Ungueltiges Definitionspaket ignoriert: {exc}",
+                            file=sys.stderr,
+                        )
+                        continue
+
+                    if packet.HasField("geometry"):
+                        self._cached_geometry = self._kopiere_protobuf(
+                            packet.geometry
+                        )
+                    self._grosses_paket_eingelesen = True
+                continue
+
+            positionspakete.append(data)
+
+        if not positionspakete:
+            return None
+
+        letztes_paket_mit_detection = None
+        roboter_nach_id = {
+            "robots_blue": {},
+            "robots_yellow": {},
+        }
+        roboter_ohne_id = {
+            "robots_blue": [],
+            "robots_yellow": [],
+        }
+        letzter_ball = []
+
+        for data in positionspakete:
             packet = SSL_WrapperPacket.SSL_WrapperPacket()
-            packet.ParseFromString(data)
+            try:
+                packet.ParseFromString(data)
+            except DecodeError as exc:
+                print(f"Ungueltiges Vision-Paket ignoriert: {exc}", file=sys.stderr)
+                continue
 
-            return packet
+            if not packet.HasField("detection"):
+                continue
 
-        except BlockingIOError:
-            # Kein Paket verfügbar, ist normal bei non-blocking socket
+            letztes_paket_mit_detection = packet
+            detection = packet.detection
+
+            if detection.balls:
+                letzter_ball = [
+                    self._kopiere_protobuf(ball)
+                    for ball in detection.balls
+                ]
+
+            for feld, roboter_liste in (
+                ("robots_blue", detection.robots_blue),
+                ("robots_yellow", detection.robots_yellow),
+            ):
+                roboter_ohne_id[feld] = [
+                    self._kopiere_protobuf(roboter)
+                    for roboter in roboter_liste
+                    if not roboter.HasField("robot_id")
+                ]
+
+                for roboter in roboter_liste:
+                    if not roboter.HasField("robot_id"):
+                        continue
+
+                    roboter_id = roboter.robot_id
+                    roboter_nach_id[feld][roboter_id] = (
+                        self._kopiere_protobuf(roboter)
+                    )
+
+        if letztes_paket_mit_detection is None:
             return None
 
-        except Exception as e:
-            print(f"Fehler beim Empfangen: {e}")
+        hat_positionen = (
+            letzter_ball
+            or any(roboter_nach_id[feld] for feld in roboter_nach_id)
+            or any(roboter_ohne_id[feld] for feld in roboter_ohne_id)
+        )
+        if not hat_positionen:
             return None
+
+        ergebnis = SSL_WrapperPacket.SSL_WrapperPacket()
+        ergebnis.CopyFrom(letztes_paket_mit_detection)
+        detection = ergebnis.detection
+        del detection.balls[:]
+        del detection.robots_blue[:]
+        del detection.robots_yellow[:]
+
+        for ball in letzter_ball:
+            detection.balls.add().CopyFrom(ball)
+
+        for feld in ("robots_blue", "robots_yellow"):
+            for roboter in roboter_nach_id[feld].values():
+                getattr(detection, feld).add().CopyFrom(roboter)
+            for roboter in roboter_ohne_id[feld]:
+                getattr(detection, feld).add().CopyFrom(roboter)
+
+        if self._cached_geometry is not None:
+            ergebnis.geometry.CopyFrom(self._cached_geometry)
+
+        return ergebnis
+
+    @staticmethod
+    def _kopiere_protobuf(nachricht):
+        kopie = type(nachricht)()
+        kopie.CopyFrom(nachricht)
+        return kopie
 
     def sende_roboter_befehl(
         self,

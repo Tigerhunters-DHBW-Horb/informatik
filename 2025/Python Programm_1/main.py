@@ -9,13 +9,13 @@ from WeltModell import WeltModell
 # VM_IP = "192.168.0.104"
 #VM_IP =  "192.168.42.41"
 VM_IP = "127.0.0.1"
-ROBOTER_ID = 1
+ROBOTER_ID = 0
 TEAM_GELB = True
 
 SCHLEIFENZEIT = 0.016  # ca. 60 Hz
 
 # Reglerwerte
-KP_LINEAR = 0.4
+KP_LINEAR = 1.4
 MAX_V_MMS = 5000.0      # 500 mm/s = 0.5 m/s
 ABSTAND_STOPP = 120.0  # mm
 # ---------------------

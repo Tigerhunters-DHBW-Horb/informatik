@@ -13,7 +13,8 @@ import ssl_vision_wrapper_pb2 as SSL_WrapperPacket
 
 
 VISION_MULTICAST_IP = "224.5.23.2"
-VISION_PORT = 10006
+# VISION_PORT = 10006
+VISION_PORT = 10020
 
 
 def erstelle_empfaenger():
