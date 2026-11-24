@@ -55,7 +55,7 @@ class KommunikationGrSim:
         print(f"Command-Ziel: {self.vm_ip}:{command_port}")
 
     def empfange_paket(self):
-        positionspakete = deque(maxlen=4)
+        positionspakete = deque(maxlen=4) # maxlen=4, um die letzten 4 Pakete zu speichern bei 4 Kameras
 
         while True:
             try:

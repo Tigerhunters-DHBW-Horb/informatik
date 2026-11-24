@@ -14,7 +14,7 @@ public class SslVisionReceiver
 
     public SslVisionReceiver()
     {
-        _udpClient = new UdpClient(10006);
+        _udpClient = new UdpClient(10020);
 
         _udpClient.JoinMulticastGroup(
             IPAddress.Parse("224.5.23.2"));

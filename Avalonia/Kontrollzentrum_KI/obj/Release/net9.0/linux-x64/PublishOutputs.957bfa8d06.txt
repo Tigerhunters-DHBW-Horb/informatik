@@ -1,0 +1,4 @@
+C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\bin\Release\net9.0\linux-x64\publish\Kontrollzentrum.pdb
+C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\bin\Release\net9.0\linux-x64\publish\libHarfBuzzSharp.so
+C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\bin\Release\net9.0\linux-x64\publish\libSkiaSharp.so
+C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\bin\Release\net9.0\linux-x64\publish\Kontrollzentrum

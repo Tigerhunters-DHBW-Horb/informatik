@@ -1,0 +1,286 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Kontrollzentrum.ViewModels"
+        xmlns:models="using:Kontrollzentrum.Models"
+        x:Class="Kontrollzentrum.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="RoboCup Control &amp; Monitoring"
+        Width="1440"
+        Height="900"
+        MinWidth="1050"
+        MinHeight="700"
+        Background="#F3F5F8">
+
+    <Window.Styles>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="8,2"/>
+            <Setter Property="CornerRadius" Value="10"/>
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="#EAF2FF"/>
+            <Setter Property="Foreground" Value="#2563EB"/>
+        </Style>
+        <Style Selector="TabControl">
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid ColumnDefinitions="230,*">
+        <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E6E9EF" BorderThickness="0,0,1,0">
+            <Grid RowDefinitions="Auto,*,Auto" Margin="12,20,12,16">
+                <StackPanel Margin="10,0,10,28" Orientation="Horizontal" Spacing="10">
+                    <Border Width="38" Height="38" CornerRadius="12" Background="#2563EB">
+                        <TextBlock Text="RC" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="RoboCup" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock Text="Control Center" FontSize="11" Foreground="#8791A1"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding NavItems}"
+                         SelectedItem="{Binding SelectedPage}"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" Margin="14,11" FontSize="13" FontWeight="Medium"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Grid.Row="2" Margin="8,12,8,0" Padding="12" CornerRadius="12" Background="#F7F8FA" BorderBrush="#ECEEF2" BorderThickness="1">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Ellipse Width="9" Height="9" Fill="#22C55E" VerticalAlignment="Top" Margin="0,5,8,0"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding SystemStatus}" FontSize="12" FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding ReceivedCount, StringFormat='{}{0} packets'}" FontSize="10" Foreground="#8791A1" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+            <Border Height="76" Background="#FFFFFF" BorderBrush="#E6E9EF" BorderThickness="0,0,0,1" Padding="28,0">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedPage}" FontSize="22" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding SystemStatus}" FontSize="11" Foreground="#8791A1" Margin="0,3,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Border CornerRadius="8" Background="#F0F6FF" Padding="10,7">
+                            <TextBlock Text="{Binding Latency}" Foreground="#2563EB" FontSize="12" FontWeight="SemiBold"/>
+                        </Border>
+                        <Button Content="{Binding IsTestMode, StringFormat='Test mode: {0}'}"
+                                Command="{Binding ToggleTestModeCommand}"
+                                Padding="12,8" CornerRadius="8" BorderThickness="0"
+                                Background="#EDF7F0" Foreground="#16803A"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedIndex}" BorderThickness="0" Margin="0">
+                <TabItem>
+                    <ScrollViewer Padding="28" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Spacing="18">
+                            <ItemsControl ItemsSource="{Binding StatusCards}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:StatusCardModel">
+                                        <Border Margin="0,0,12,0" Padding="18" CornerRadius="14" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                                            <StackPanel Spacing="8">
+                                                <TextBlock Text="{Binding Title}" Foreground="#738096" FontSize="12"/>
+                                                <TextBlock Text="{Binding Value}" FontSize="28" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="#8791A1"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <Ellipse Width="7" Height="7" Fill="#22C55E"/>
+                                                    <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold" Foreground="#16803A"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Grid ColumnDefinitions="1.35*,*" Height="310">
+                                <Border Margin="0,0,12,0" Padding="20" CornerRadius="14" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock Text="System overview" FontSize="15" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Live component health" FontSize="11" Foreground="#8791A1" Margin="0,4,0,16"/>
+                                        <WrapPanel>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#F7F9FC" BorderBrush="#E6EAF0" BorderThickness="1">
+                                                <TextBlock Text="grSim" HorizontalAlignment="Center"/><Border.RenderTransform><TranslateTransform/></Border.RenderTransform>
+                                            </Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#F7F9FC"><TextBlock Text="Communication" HorizontalAlignment="Center"/></Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#F7F9FC"><TextBlock Text="SSN" HorizontalAlignment="Center"/></Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#F7F9FC"><TextBlock Text="Robot Manager" HorizontalAlignment="Center"/></Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#EEF8F1"><TextBlock Text="Data Processing" HorizontalAlignment="Center" Foreground="#16803A"/></Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#F7F9FC"><TextBlock Text="Sensor Manager" HorizontalAlignment="Center"/></Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#F7F9FC"><TextBlock Text="Control System" HorizontalAlignment="Center"/></Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#EEF8F1"><TextBlock Text="Field View" HorizontalAlignment="Center" Foreground="#16803A"/></Border>
+                                            <Border Margin="5" CornerRadius="10" Padding="12" Background="#EEF8F1"><TextBlock Text="Data Analysis" HorizontalAlignment="Center" Foreground="#16803A"/></Border>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </Border>
+                                <Border Padding="20" CornerRadius="14" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                                    <StackPanel Spacing="14">
+                                        <TextBlock Text="Packet activity" FontSize="15" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Live receive / transmit rates" FontSize="11" Foreground="#8791A1"/>
+                                        <Border Height="170" CornerRadius="10" Background="#F8FAFC" ClipToBounds="True">
+                                            <Canvas>
+                                                <Polyline Points="8,145 70,128 132,134 194,96 256,112 318,62 380,78 442,38 504,48 566,24"
+                                                          Stroke="#2563EB" StrokeThickness="3"/>
+                                                <Polyline Points="8,158 70,152 132,145 194,149 256,138 318,125 380,130 442,118 504,123 566,108"
+                                                          Stroke="#98A2B3" StrokeThickness="2"/>
+                                            </Canvas>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem>
+                    <ScrollViewer Padding="28">
+                        <StackPanel Spacing="16">
+                            <Border Padding="20" CornerRadius="14" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel><TextBlock Text="grSim adapter" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Protocol implementation intentionally not assumed" Foreground="#8791A1" Margin="0,4,0,0"/></StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                        <Button Content="Connect" IsEnabled="False" Padding="12,8"/>
+                                        <Button Content="Disconnect" IsEnabled="False" Padding="12,8"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="The application uses a mock adapter until the grSim/SSN packet specifications are available. No protocol-specific bytes or control commands are generated." TextWrapping="Wrap" Foreground="#677287"/>
+                            <Grid ColumnDefinitions="*,*" Height="220">
+                                <Border Margin="0,0,8,0" Padding="16" CornerRadius="12" Background="White"><StackPanel><TextBlock Text="Visual view" FontWeight="SemiBold"/><TextBlock Text="{Binding ReceivedCount, StringFormat='Received: {0}'}" Margin="0,16,0,0"/></StackPanel></Border>
+                                <Border Margin="8,0,0,0" Padding="16" CornerRadius="12" Background="White"><StackPanel><TextBlock Text="Raw data view" FontWeight="SemiBold"/><TextBlock Text="Timestamp | Source | Payload | Status" Margin="0,16,0,0" Foreground="#8791A1"/></StackPanel></Border>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem>
+                    <StackPanel Margin="28" Spacing="16">
+                        <TextBlock Text="SSN communication" FontSize="18" FontWeight="SemiBold"/>
+                        <TextBlock Text="SSN is kept as an independent adapter. A mock implementation provides test traffic without defining a proprietary protocol." TextWrapping="Wrap" Foreground="#677287"/>
+                        <Border Padding="18" CornerRadius="12" Background="White"><TextBlock Text="{Binding SsnStatus, StringFormat='Adapter status: {0}'}"/></Border>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem>
+                    <Grid Margin="28" ColumnDefinitions="1.6*,*">
+                        <Border Margin="0,0,14,0" CornerRadius="14" Background="#EAF0E8" BorderBrush="#CDD8C7" BorderThickness="2" Padding="18">
+                            <Canvas Width="900" Height="600">
+                                <Rectangle Canvas.Left="35" Canvas.Top="30" Width="830" Height="540" Fill="#DDE9D4" Stroke="White" StrokeThickness="4"/>
+                                <Rectangle Canvas.Left="450" Canvas.Top="30" Width="0" Height="540" Stroke="White" StrokeThickness="3"/>
+                                <Ellipse Canvas.Left="410" Canvas.Top="255" Width="80" Height="80" Stroke="White" StrokeThickness="3"/>
+                                <Rectangle Canvas.Left="35" Canvas.Top="220" Width="18" Height="160" Fill="White"/>
+                                <Rectangle Canvas.Left="847" Canvas.Top="220" Width="18" Height="160" Fill="White"/>
+                                <ItemsControl ItemsSource="{Binding Robots}">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><Canvas/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="models:RobotModel">
+                                            <Canvas>
+                                                <Ellipse Canvas.Left="{Binding DisplayX}" Canvas.Top="{Binding DisplayY}" Width="28" Height="28"
+                                                         Fill="#2563EB" Stroke="White" StrokeThickness="2"/>
+                                                <TextBlock Canvas.Left="{Binding DisplayX}" Canvas.Top="{Binding DisplayY}" Text="{Binding Id}"
+                                                           Width="28" Height="28" TextAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="White" FontSize="11" FontWeight="Bold"/>
+                                            </Canvas>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Canvas>
+                        </Border>
+                        <Border Padding="18" CornerRadius="14" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Live robots" FontWeight="SemiBold"/>
+                                <ItemsControl ItemsSource="{Binding Robots}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="models:RobotModel">
+                                            <Border Padding="10" Margin="0,4" CornerRadius="8" Background="#F7F9FC">
+                                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                                    <Ellipse Width="10" Height="10" Fill="#2563EB" Margin="0,0,8,0"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Id, StringFormat='Robot {0}'}"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding OperationalStatus}" FontSize="11" Foreground="#16803A"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <TabItem>
+                    <ScrollViewer Padding="28">
+                        <ItemsControl ItemsSource="{Binding Robots}">
+                            <ItemsControl.ItemsPanel>                            <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:RobotModel">
+                                    <Border Margin="0,0,12,12" Padding="16" CornerRadius="12" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                                        <StackPanel Spacing="7">
+                                            <TextBlock Text="{Binding Id, StringFormat='Robot {0}'}" FontSize="16" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Team, StringFormat='Team: {0}'}" Foreground="#8791A1"/>
+                                            <TextBlock Text="{Binding OperationalStatus, StringFormat='Status: {0}'}"/>
+                                            <TextBlock Text="{Binding X, StringFormat='X: {0:0.0}'}"/>
+                                            <TextBlock Text="{Binding Y, StringFormat='Y: {0:0.0}'}"/>
+                                            <TextBlock Text="{Binding RotationDegrees, StringFormat='Rotation: {0:0.0}°'}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </TabItem>
+
+                <TabItem>
+                    <Grid Margin="28" RowDefinitions="Auto,*">
+                        <TextBlock Text="Live message monitor" FontSize="18" FontWeight="SemiBold"/>
+                        <Border Grid.Row="1" Margin="0,12,0,0" CornerRadius="12" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                            <ListBox ItemsSource="{Binding Messages}" Margin="8">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:CommunicationMessage">
+                                        <Grid ColumnDefinitions="150,110,150,*" Margin="4">
+                                            <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:HH:mm:ss.fff}'}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Source}"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding MessageType}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding Payload}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <TabItem><StackPanel Margin="28" Spacing="12"><TextBlock Text="Sensors" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Sensor model and live values will populate from adapter data. No simulated sensor values are currently presented as hardware readings." TextWrapping="Wrap" Foreground="#677287"/></StackPanel></TabItem>
+                <TabItem><StackPanel Margin="28" Spacing="12"><TextBlock Text="Control" FontSize="18" FontWeight="SemiBold"/><Border Padding="16" CornerRadius="10" Background="#FFF4E5" BorderBrush="#F3D1A5" BorderThickness="1"><TextBlock Text="Command sending is disabled until a specified protocol and safety interlock are available." TextWrapping="Wrap" Foreground="#9A5B10"/></Border></StackPanel></TabItem>
+                <TabItem><StackPanel Margin="28" Spacing="12"><TextBlock Text="Data Analysis" FontSize="18" FontWeight="SemiBold"/><TextBlock Text="Live chart infrastructure is ready for bounded time-series data; domain metrics can be connected once protocol models are provided." TextWrapping="Wrap" Foreground="#677287"/></StackPanel></TabItem>
+                <TabItem><StackPanel Margin="28" Spacing="12"><TextBlock Text="Logs" FontSize="18" FontWeight="SemiBold"/><Border Padding="16" CornerRadius="10" Background="White"><TextBlock Text="Connection events and communication messages are available in the live message monitor." TextWrapping="Wrap"/></Border></StackPanel></TabItem>
+                <TabItem>
+                    <StackPanel Margin="28" MaxWidth="700" HorizontalAlignment="Left" Spacing="10">
+                        <TextBlock Text="Settings" FontSize="18" FontWeight="SemiBold"/>
+                        <Border Padding="18" CornerRadius="12" Background="White" BorderBrush="#E5E8EE" BorderThickness="1">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Operating mode"/>
+                                <TextBlock Text="{Binding IsTestMode, StringFormat='Test mode: {0}'}"/>
+                                <TextBlock Text="grSim endpoint: not configured" Foreground="#8791A1"/>
+                                <TextBlock Text="SSN endpoint: not configured" Foreground="#8791A1"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</Window>

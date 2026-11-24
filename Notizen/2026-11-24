@@ -1,0 +1,115 @@
+2 Funktionen zum Datenauslesen (Positionen und Geometrie) nach Vorbild von empfange Paket in Kommunikation.py 
+--> Aktuell dort unterscheidung der Pakete, dauerhaft aber alles return
+
+def initialize(self, measurement): übergeben werden x,y und funktion fasst diese in measurement zusammen
+self.x in xy umbenennen
+
+self.A = np.array([
+            [1, 0, dt, 0],
+            [0, 1, 0, dt],
+            [0, 0, alpha, 0],
+            [0, 0, 0, alpha]
+        ])
+self.x[0] = measurement[0]
+        self.x[1] = measurement[1]
+        self.x[2] = 0 # Annahme
+        self.x[3] = 0 # Annahme
+
+self.x = self.A @ self.x --> Zustabdsvektor wird mit Matrix multipliziert, Position wird anhand von Geschw angepasst und GEschwindigkeit wird mit alpha reduzuert
+
+
+
+
+
+Root -->         vision_paket = kom.empfange_paket() in main
+│
+├── detection
+│   │
+│   ├── frame_number
+│   ├── t_capture
+│   ├── t_sent
+│   ├── camera_id
+│   │
+│   ├── balls
+│   │   ├── confidence
+│   │   ├── x
+│   │   ├── y
+│   │   ├── pixel_x
+│   │   └── pixel_y
+│   │
+│   ├── robots_yellow
+│   │   ├── confidence
+│   │   ├── robot_id
+│   │   ├── x
+│   │   ├── y
+│   │   ├── orientation
+│   │   ├── pixel_x
+│   │   └── pixel_y
+│   │
+│   └── robots_blue
+│       ├── confidence
+│       ├── robot_id
+│       ├── x
+│       ├── y
+│       ├── orientation
+│       ├── pixel_x
+│       └── pixel_y
+│
+└── geometry
+    │
+    ├── field
+    │   │
+    │   ├── field_length
+    │   ├── field_width
+    │   ├── goal_width
+    │   ├── goal_depth
+    │   ├── boundary_width
+    │   │
+    │   ├── field_lines
+    │   │   ├── name
+    │   │   ├── p1
+    │   │   │   ├── x
+    │   │   │   └── y
+    │   │   ├── p2
+    │   │   │   ├── x
+    │   │   │   └── y
+    │   │   └── thickness
+    │   │
+    │   └── field_arcs
+    │       ├── name
+    │       ├── center
+    │       │   ├── x
+    │       │   └── y
+    │       ├── radius
+    │       ├── a1
+    │       ├── a2
+    │       └── thickness
+    │
+    ├── calib
+    │   ├── camera_id
+    │   ├── focal_length
+    │   ├── principal_point_x
+    │   ├── principal_point_y
+    │   ├── distortion
+    │   ├── q0
+    │   ├── q1
+    │   ├── q2
+    │   ├── q3
+    │   ├── tx
+    │   ├── ty
+    │   ├── tz
+    │   ├── derived_camera_world_tx
+    │   ├── derived_camera_world_ty
+    │   └── derived_camera_world_tz
+    │
+    └── models
+        │
+        ├── straight_two_phase
+        │   ├── acc_slide
+        │   ├── acc_roll
+        │   └── k_switch
+        │
+        └── chip_fixed_loss
+            ├── damping_xy_first_hop
+            ├── damping_xy_other_hops
+            └── damping_z

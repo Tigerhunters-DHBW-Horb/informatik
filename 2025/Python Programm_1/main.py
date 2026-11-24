@@ -59,6 +59,7 @@ def run_hauptprogramm():
             # -----------------------------
             vision_paket = kom.empfange_paket()
 
+
             if vision_paket and vision_paket.HasField("detection"):
                 det = vision_paket.detection
 
