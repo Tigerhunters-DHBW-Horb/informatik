@@ -1,3 +1,37 @@
 .venv/
 venv/
 env/
+
+# Build-Ergebnisse
+bin/
+obj/
+#Avalonia/Kontrollzentrum/bin/Debug
+
+# Benutzer- und IDE-Dateien
+.vs/
+.vscode/
+
+# Avalonia Previewer
+*.axaml.g.cs
+*.axaml.cs.cache
+
+# Nutzerbezogene Einstellungen
+*.user
+*.suo
+*.userosscache
+
+# Logs
+*.log
+
+# Betriebssystem-Dateien
+.DS_Store
+Thumbs.db
+
+# Dotnet
+project.assets.json
+project.nuget.cache
+
+# Publish-Ausgaben
+publish/
+
+test/
