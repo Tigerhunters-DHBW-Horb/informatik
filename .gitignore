@@ -3,9 +3,7 @@ venv/
 env/
 
 # Build-Ergebnisse
-bin/
-obj/
-#Avalonia/Kontrollzentrum/bin/Debug
+Avalonia/Kontrollzentrum/bin/Debug
 
 # Benutzer- und IDE-Dateien
 .vs/
@@ -30,8 +28,3 @@ Thumbs.db
 # Dotnet
 project.assets.json
 project.nuget.cache
-
-# Publish-Ausgaben
-publish/
-
-test/
