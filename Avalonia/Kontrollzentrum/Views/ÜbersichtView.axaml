@@ -1,19 +1,21 @@
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    x:Class="Kontrollzentrum.Views.ÜbersichtView">
+    xmlns:vm="using:Kontrollzentrum.ViewModels"
+    x:Class="Kontrollzentrum.Views.ÜbersichtView"
+    x:DataType="vm:ÜbersichtViewModel">
 
     <Grid
-          ColumnDefinitions="*,*,*"
-          RowDefinitions="*,*"
-          ShowGridLines="false">
+        ColumnDefinitions="*,*,*"
+        RowDefinitions="*,*"
+        ShowGridLines="false">
         <Border
             Grid.Row="0"
             Grid.Column="0"
             Margin="12"
             Padding="18"
-            Background="White"
-            BorderBrush="#EAE8E5"
+            Background="{DynamicResource CardBackground}"
+            BorderBrush="{DynamicResource CardBorder}"
             BorderThickness="1"
             CornerRadius="20">
             <StackPanel Spacing="12">
@@ -21,56 +23,101 @@
                     <TextBlock
                         Text="Datenempfang"
                         FontSize="14"
-                        Foreground="{StaticResource TextSecondary}" />
+                        Foreground="{DynamicResource TextSecondary}" />
                     <TextBlock
                         Text="grSim / SSL-Vision"
                         FontSize="12"
-                        Foreground="{StaticResource TextSecondary}" />
+                        Foreground="{DynamicResource TextSecondary}" />
                 </StackPanel>
 
-                <Border Height="1" Background="#EEECE9" />
+                <Border Height="1" Background="{DynamicResource Divider}" />
+
+                <Grid
+                    ColumnDefinitions="Auto,*"
+                    RowDefinitions="Auto,Auto"
+                    ColumnSpacing="16"
+                    RowSpacing="10">
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Text="Multicast-Adresse"
+                        VerticalAlignment="Center" />
+
+                    <TextBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Right"
+                        Text="{Binding MulticastAddress, Mode=TwoWay}"
+                        IsEnabled="{Binding CanEditConnection}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="UDP-Port"
+                        VerticalAlignment="Center" />
+
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Right"
+                        Text="{Binding Port, Mode=TwoWay}"
+                        IsEnabled="{Binding CanEditConnection}" />
+                </Grid>
 
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock
                         Text="Zeit"
-                        Foreground="{StaticResource TextSecondary}"
+                        Foreground="{DynamicResource TextSecondary}"
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Column="1"
                         Text="--"
                         FontSize="16"
                         FontWeight="SemiBold"
-                        Foreground="{StaticResource TextPrimary}"
+                        Foreground="{DynamicResource TextPrimary}"
                         VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock
                         Text="Pakete/s"
-                        Foreground="{StaticResource TextSecondary}"
+                        Foreground="{DynamicResource TextSecondary}"
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Column="1"
-                        Text="--"
+                        Text="{Binding PacketsPerSecond, StringFormat={}{0:F1}}"
                         FontSize="16"
                         FontWeight="SemiBold"
-                        Foreground="{StaticResource TextPrimary}"
+                        Foreground="{DynamicResource TextPrimary}"
                         VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock
                         Text="KB/s"
-                        Foreground="{StaticResource TextSecondary}"
+                        Foreground="{DynamicResource TextSecondary}"
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Column="1"
-                        Text="--"
+                        Text="{Binding KilobytesPerSecond, StringFormat={}{0:F1}}"
                         FontSize="16"
                         FontWeight="SemiBold"
-                        Foreground="{StaticResource TextPrimary}"
+                        Foreground="{DynamicResource TextPrimary}"
                         VerticalAlignment="Center" />
                 </Grid>
+
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <Button
+                        Content="Start"
+                        Command="{Binding StartReceptionCommand}" />
+
+                    <Button
+                        Content="Stop"
+                        Command="{Binding StartReceptionCancelCommand}" />
+                </StackPanel>
             </StackPanel>
         </Border>
         <Border
@@ -78,8 +125,8 @@
             Grid.Column="1"
             Margin="12"
             Padding="18"
-            Background="White"
-            BorderBrush="#EAE8E5"
+            Background="{DynamicResource CardBackground}"
+            BorderBrush="{DynamicResource CardBorder}"
             BorderThickness="1"
             CornerRadius="20">
             <StackPanel Spacing="12">
@@ -88,7 +135,7 @@
                         Grid.Column="0"
                         Text="Kalman Filter"
                         FontSize="14"
-                        Foreground="{StaticResource TextSecondary}"
+                        Foreground="{DynamicResource TextSecondary}"
                         VerticalAlignment="Center" />
                     <ToggleSwitch
                         Grid.Column="1"
@@ -100,55 +147,68 @@
                         VerticalAlignment="Center" />
                 </Grid>
 
-                <Border Height="1" Background="#EEECE9" />
+                <Border Height="1" Background="{DynamicResource Divider}" />
 
-                <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock
-                        Text="Zeit"
-                        Foreground="{StaticResource TextSecondary}"
-                        VerticalAlignment="Center" />
-                    <TextBlock
-                        Grid.Column="1"
-                        Text="--"
-                        FontSize="16"
-                        FontWeight="SemiBold"
-                        Foreground="{StaticResource TextPrimary}"
-                        VerticalAlignment="Center" />
-                </Grid>
+
 
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock
                         Text="Pakete/s"
-                        Foreground="{StaticResource TextSecondary}"
+                        Foreground="{DynamicResource TextSecondary}"
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Column="1"
                         Text="--"
                         FontSize="16"
                         FontWeight="SemiBold"
-                        Foreground="{StaticResource TextPrimary}"
+                        Foreground="{DynamicResource TextPrimary}"
                         VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock
                         Text="KB/s"
-                        Foreground="{StaticResource TextSecondary}"
+                        Foreground="{DynamicResource TextSecondary}"
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Column="1"
                         Text="--"
                         FontSize="16"
                         FontWeight="SemiBold"
-                        Foreground="{StaticResource TextPrimary}"
+                        Foreground="{DynamicResource TextPrimary}"
                         VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock
+                        Text="IP-Adresse"
+                        Foreground="{DynamicResource TextSecondary}"
+                        VerticalAlignment="Center" />
+                    <MaskedTextBox
+                        Grid.Column="1"
+                        Mask="###\.###\.###\.###"
+                        PromptChar=" "
+                        Text="127.000.000.001"
+                        Foreground="{DynamicResource TextPrimary}" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock
+                        Text="Port"
+                        Foreground="{DynamicResource TextSecondary}"
+                        VerticalAlignment="Center" />
+                    <MaskedTextBox
+                        Grid.Column="1"
+                        Mask="#####"
+                        Text="10020"
+                        Foreground="{DynamicResource TextPrimary}" />
                 </Grid>
             </StackPanel>
         </Border>
-        <TextBlock Grid.Row="0" Grid.Column="2" Text="Feld 3" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}" />
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Feld 4" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}" />
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="Feld 5" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}" />
-        <TextBlock Grid.Row="1" Grid.Column="2" Text="Feld 6" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}" />
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="Feld 3" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Feld 4" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="Feld 5" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="Feld 6" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
     </Grid>
 
 </UserControl>

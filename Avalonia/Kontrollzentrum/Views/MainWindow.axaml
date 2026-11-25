@@ -9,22 +9,50 @@
     MinWidth="700"
     MinHeight="600"
     WindowStartupLocation="CenterScreen"
-    Background="#F5F3F0">
+    Background="{DynamicResource WindowBackground}">
 
     <!-- Farben und Maße zentral definieren -->
     <Window.Resources>
-        <SolidColorBrush x:Key="TextPrimary">#0B0B23</SolidColorBrush>
-        <SolidColorBrush x:Key="TextSecondary">#5C6078</SolidColorBrush>
-        <SolidColorBrush x:Key="AccentBlue">#087BFF</SolidColorBrush>
-        <SolidColorBrush x:Key="CardDark">#08071E</SolidColorBrush>
-        <!-- Toggle Switch Hover im ausgeschalteten Zustand -->
-        <SolidColorBrush x:Key="ToggleSwitchFillOffPointerOver">#E6E6E6</SolidColorBrush>
-        <!-- <SolidColorBrush x:Key="ToggleSwitchStrokeOffPointerOver">#525353</SolidColorBrush> -->
-        <!--<SolidColorBrush x:Key="ToggleSwitchKnobFillOffPointerOver">#087BFF</SolidColorBrush>-->
-        <!-- Hover im eingeschalteten Zustand -->
-        <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver">#97A59A</SolidColorBrush>
-        <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver">#525353</SolidColorBrush>
-        <!-- <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver">White</SolidColorBrush> -->
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="WindowBackground">#F5F3F0</SolidColorBrush>
+                    <SolidColorBrush x:Key="TextPrimary">#0B0B23</SolidColorBrush>
+                    <SolidColorBrush x:Key="TextSecondary">#5C6078</SolidColorBrush>
+                    <SolidColorBrush x:Key="AccentColor">#51483D</SolidColorBrush>
+                    <SolidColorBrush x:Key="AccentForeground">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardBackground">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardBorder">#EAE8E5</SolidColorBrush>
+                    <SolidColorBrush x:Key="Divider">#EEECE9</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardDark">#08071E</SolidColorBrush>
+                    <SolidColorBrush x:Key="SidebarHoverBackground">#EAE7E3</SolidColorBrush>
+                    <SolidColorBrush x:Key="SidebarSelectedBackground">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleSwitchFillOffPointerOver">#E6E6E6</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver">#97A59A</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver">#525353</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundChecked">Transparent</SolidColorBrush>
+<SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver">Transparent</SolidColorBrush>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="WindowBackground">#1B1A18</SolidColorBrush>
+                    <SolidColorBrush x:Key="TextPrimary">#F5F5FF</SolidColorBrush>
+                    <SolidColorBrush x:Key="TextSecondary">#B8B8CC</SolidColorBrush>
+                    <SolidColorBrush x:Key="AccentColor">#756858</SolidColorBrush>
+                    <SolidColorBrush x:Key="AccentForeground">White</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardBackground">#362E22</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardBorder">#51463A</SolidColorBrush>
+                    <SolidColorBrush x:Key="Divider">#4A4138</SolidColorBrush>
+                    <SolidColorBrush x:Key="CardDark">#08071E</SolidColorBrush>
+                    <SolidColorBrush x:Key="SidebarHoverBackground">#493E33</SolidColorBrush>
+                    <SolidColorBrush x:Key="SidebarSelectedBackground">#362E22</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleSwitchFillOffPointerOver">#493E33</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver">#756858</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver">#B8A88E</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundChecked">Transparent</SolidColorBrush>
+<SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver">Transparent</SolidColorBrush>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
 
     <Window.Styles>
@@ -40,7 +68,7 @@
         <Style Selector="ListBox.sidebar-menu ListBoxItem">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Foreground"
-                    Value="{StaticResource TextSecondary}" />
+                    Value="{DynamicResource TextSecondary}" />
             <Setter Property="Padding" Value="12,10" />
             <Setter Property="Margin" Value="0,0,0,5" />
             <Setter Property="MinHeight" Value="42" />
@@ -70,14 +98,14 @@
 
         <!-- Maus über einem Menüeintrag -->
         <Style Selector="ListBox.sidebar-menu ListBoxItem:pointerover">
-            <Setter Property="Background" Value="#EAE7E3" />
+            <Setter Property="Background" Value="{DynamicResource SidebarHoverBackground}" />
         </Style>
 
         <!-- Ausgewählter Menüeintrag -->
         <Style Selector="ListBox.sidebar-menu ListBoxItem:selected">
-            <Setter Property="Background" Value="White" />
+            <Setter Property="Background" Value="{DynamicResource SidebarSelectedBackground}" />
             <Setter Property="Foreground"
-                    Value="{StaticResource TextPrimary}" />
+                    Value="{DynamicResource TextPrimary}" />
         </Style>
 
         <!-- Einheitliche Größe für die vorläufigen Menüsymbole -->
@@ -109,9 +137,9 @@
                     Width="50"
                     Height="50"
                     CornerRadius="11"
-                    Background="{StaticResource AccentBlue}">
+                    Background="{DynamicResource AccentColor}">
 
-                    <icons:MaterialIcon Kind="BowArrow" Width="35" Height="35" Foreground="{StaticResource TextPrimary}" />
+                    <icons:MaterialIcon Kind="BowArrow" Width="35" Height="35" Foreground="{DynamicResource AccentForeground}" />
 
                     <!-- <TextBlock
                     Text="TH"
@@ -129,7 +157,7 @@
                     Text="Tigerhunters"
                     FontSize="21"
                     FontWeight="SemiBold"
-                    Foreground="{StaticResource TextPrimary}"
+                    Foreground="{DynamicResource TextPrimary}"
                     VerticalAlignment="Center" />
 
             </StackPanel>
@@ -234,57 +262,44 @@
 
             </ListBox>
 
-            <!-- Statuskarte unten -->
-            <!-- <Border
-            Grid.Row="2"
-            Background="{StaticResource CardDark}"
-            CornerRadius="20"
-            Padding="18">
+            <Border
+                Grid.Row="2"
+                Background="{DynamicResource CardBackground}"
+                BorderBrush="{DynamicResource CardBorder}"
+                BorderThickness="2"
+                CornerRadius="16"
+                HorizontalAlignment="Left"
+                Padding="4">
+                <ToggleButton
+                    x:Name="ThemeSwitch"
+                    Width="40"
+                    Height="40"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    Padding="0"
+                    HorizontalAlignment="Center"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    VerticalAlignment="Center">
+                    <Grid>
+                        <icons:MaterialIcon
+                            x:Name="DarkThemeIcon"
+                            Kind="MoonWaningCrescent"
+                            Width="24"
+                            Height="24"
+                            Foreground="{DynamicResource TextPrimary}"
+                            IsVisible="False" />
+                        <icons:MaterialIcon
+                            x:Name="LightThemeIcon"
+                            Kind="WhiteBalanceSunny"
+                            Width="24"
+                            Height="24"
+                            Foreground="{DynamicResource TextPrimary}" />
+                    </Grid>
+                </ToggleButton>
 
-            <StackPanel Spacing="12">
-
-            <StackPanel Orientation="Horizontal" Spacing="8">
-
-            <Ellipse
-            Width="8"
-            Height="8"
-            Fill="#0BBBEF"
-            VerticalAlignment="Center" />
-
-            <TextBlock
-            Text="Exporting to grid"
-            Foreground="White"
-            FontSize="12"
-            FontWeight="SemiBold" />
-
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal" Spacing="5">
-
-            <TextBlock
-            Text="0.8"
-            Foreground="White"
-            FontSize="29" />
-
-            <TextBlock
-            Text="kW"
-            Foreground="#B8B8CC"
-            FontSize="14"
-            VerticalAlignment="Bottom"
-            Margin="0,0,0,5" />
-
-            </StackPanel>
-
-            <TextBlock
-            Text="Surplus after the house and the battery. Earning 15p per kWh."
-            Foreground="#B8B8CC"
-            FontSize="12"
-            TextWrapping="Wrap"
-            LineHeight="17" />
-
-            </StackPanel>
-
-            </Border> -->
+            </Border>
 
         </Grid>
 

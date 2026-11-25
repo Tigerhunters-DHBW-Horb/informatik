@@ -1,7 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
 using Kontrollzentrum.Views;
-using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Styling;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -18,11 +19,34 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        ThemeSwitch.IsChecked = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
+        UpdateThemeIcon();
+        ThemeSwitch.IsCheckedChanged += OnThemeSwitchChanged;
+
         // Erst nach dem Laden des XAML auf Auswahländerungen reagieren.
         SidebarMenu.SelectionChanged += OnMenuSelectionChanged;
 
         // Die bereits im XAML ausgewählte Seite anzeigen.
         ShowSelectedPage();
+    }
+
+    private void OnThemeSwitchChanged(object? sender, RoutedEventArgs e)
+    {
+        UpdateThemeIcon();
+
+        if (Application.Current is { } application)
+        {
+            application.RequestedThemeVariant = ThemeSwitch.IsChecked == true
+                ? ThemeVariant.Dark
+                : ThemeVariant.Light;
+        }
+    }
+
+    private void UpdateThemeIcon()
+    {
+        var isDark = ThemeSwitch.IsChecked == true;
+        DarkThemeIcon.IsVisible = isDark;
+        LightThemeIcon.IsVisible = !isDark;
     }
 
     private void OnMenuSelectionChanged(
