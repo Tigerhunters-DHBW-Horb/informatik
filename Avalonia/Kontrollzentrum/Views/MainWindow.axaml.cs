@@ -1,51 +1,59 @@
 using Avalonia.Controls;
+using Kontrollzentrum.Views;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-
-using Kontrollzentrum.Services;
-
+// namespace Kontrollzentrum;
 namespace Kontrollzentrum.Views;
 
 public partial class MainWindow : Window
 {
-    
-    private DateTime _lastPacketTime;
+    // Die Views einmal erstellen und beim Wechsel wiederverwenden.
+    private readonly ÜbersichtView _overviewView = new();
+
     public MainWindow()
     {
         InitializeComponent();
-        StartStatusMonitor();
 
-        var receiver = new SslVisionReceiver();
-        receiver.PacketReceived += () =>
+        // Erst nach dem Laden des XAML auf Auswahländerungen reagieren.
+        SidebarMenu.SelectionChanged += OnMenuSelectionChanged;
+
+        // Die bereits im XAML ausgewählte Seite anzeigen.
+        ShowSelectedPage();
+    }
+
+    private void OnMenuSelectionChanged(
+        object? sender,
+        SelectionChangedEventArgs e)
+    {
+        ShowSelectedPage();
+    }
+
+    private void ShowSelectedPage()
+    {
+        PageContent.Content = SidebarMenu.SelectedIndex switch
         {
-            _lastPacketTime = DateTime.Now;
+            0 => _overviewView,
+            1 => CreatePlaceholder("Match"),
+            2 => CreatePlaceholder("Devices"),
+            3 => CreatePlaceholder("Automations"),
+            4 => CreatePlaceholder("Reports"),
+            5 => CreatePlaceholder("Logbook"),
+            6 => CreatePlaceholder("Help"),
+            7 => CreatePlaceholder("Settings"),
+            _ => null
         };
-        _ = receiver.ReceiveAsync();
     }
 
-    private void Button_OnClick(object? sender, RoutedEventArgs e)
+    private static TextBlock CreatePlaceholder(string title)
     {
-        Debug.WriteLine("Click!");
-    }
-
-    private async void StartStatusMonitor()
-{
-    while (true)
-    {
-        if (DateTime.Now - _lastPacketTime
-            < TimeSpan.FromSeconds(1))
+        return new TextBlock
         {
-            StatusText.Text = "Empfange Daten";
-        }
-        else
-        {
-            StatusText.Text = "Keine Daten";
-        }
-
-        await Task.Delay(200);
+            Text = title,
+            FontSize = 28
+        };
     }
-}
 }

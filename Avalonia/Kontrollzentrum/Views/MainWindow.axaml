@@ -1,36 +1,301 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Kontrollzentrum.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
-        x:Class="Kontrollzentrum.Views.MainWindow"
-        x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Kontrollzentrum"
-        Width="400"
-        Height="200">
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    x:Class="Kontrollzentrum.Views.MainWindow"
+    Title="Kontrollzentrum"
+    Width="1100"
+    Height="720"
+    MinWidth="700"
+    MinHeight="600"
+    WindowStartupLocation="CenterScreen"
+    Background="#F5F3F0">
 
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-        to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainViewModel />
-    </Design.DataContext>
+    <!-- Farben und Maße zentral definieren -->
+    <Window.Resources>
+        <SolidColorBrush x:Key="TextPrimary">#0B0B23</SolidColorBrush>
+        <SolidColorBrush x:Key="TextSecondary">#5C6078</SolidColorBrush>
+        <SolidColorBrush x:Key="AccentBlue">#087BFF</SolidColorBrush>
+        <SolidColorBrush x:Key="CardDark">#08071E</SolidColorBrush>
+        <!-- Toggle Switch Hover im ausgeschalteten Zustand -->
+        <SolidColorBrush x:Key="ToggleSwitchFillOffPointerOver">#E6E6E6</SolidColorBrush>
+        <!-- <SolidColorBrush x:Key="ToggleSwitchStrokeOffPointerOver">#525353</SolidColorBrush> -->
+        <!--<SolidColorBrush x:Key="ToggleSwitchKnobFillOffPointerOver">#087BFF</SolidColorBrush>-->
+        <!-- Hover im eingeschalteten Zustand -->
+        <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver">#97A59A</SolidColorBrush>
+        <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver">#525353</SolidColorBrush>
+        <!-- <SolidColorBrush x:Key="ToggleSwitchKnobFillOnPointerOver">White</SolidColorBrush> -->
+    </Window.Resources>
 
-    <StackPanel
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        Spacing="10">
+    <Window.Styles>
 
-        <TextBlock
-            FontSize="20"
-            Text="SSL Vision"/>
+        <!-- Das Menü selbst bekommt keinen sichtbaren Rahmen -->
+        <Style Selector="ListBox.sidebar-menu">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
 
-        <TextBlock
-            x:Name="StatusText"
-            FontSize="18"
-            Text="Keine Daten"/>
+        <!-- Grundzustand eines Menüeintrags -->
+        <Style Selector="ListBox.sidebar-menu ListBoxItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground"
+                    Value="{StaticResource TextSecondary}" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="Margin" Value="0,0,0,5" />
+            <Setter Property="MinHeight" Value="42" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
 
-    </StackPanel>
+            <!-- Eigenes Template: kein Standard-Auswahlbalken -->
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        Padding="{TemplateBinding Padding}"
+                        CornerRadius="12">
+
+                        <ContentPresenter
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="Center" />
+
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <!-- Maus über einem Menüeintrag -->
+        <Style Selector="ListBox.sidebar-menu ListBoxItem:pointerover">
+            <Setter Property="Background" Value="#EAE7E3" />
+        </Style>
+
+        <!-- Ausgewählter Menüeintrag -->
+        <Style Selector="ListBox.sidebar-menu ListBoxItem:selected">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground"
+                    Value="{StaticResource TextPrimary}" />
+        </Style>
+
+        <!-- Einheitliche Größe für die vorläufigen Menüsymbole -->
+        <Style Selector="TextBlock.menu-icon">
+            <Setter Property="FontSize" Value="19" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+    </Window.Styles>
+
+    <!-- Links feste Breite, rechts verbleibender Platz -->
+    <Grid ColumnDefinitions="220,*">
+
+        <!-- Seitenleiste -->
+        <Grid
+            Grid.Column="0"
+            Margin="20,26,12,22"
+            RowDefinitions="Auto,*,Auto">
+
+            <!-- Logo -->
+            <StackPanel
+                Grid.Row="0"
+                Orientation="Horizontal"
+                Spacing="10"
+                Margin="8,0,0,30">
+
+                <Border
+                    Width="50"
+                    Height="50"
+                    CornerRadius="11"
+                    Background="{StaticResource AccentBlue}">
+
+                    <icons:MaterialIcon Kind="BowArrow" Width="35" Height="35" Foreground="{StaticResource TextPrimary}" />
+
+                    <!-- <TextBlock
+                    Text="TH"
+                    Foreground="White"
+                    FontSize="21"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" /> -->
+
+
+
+                </Border>
+
+                <TextBlock
+                    Text="Tigerhunters"
+                    FontSize="21"
+                    FontWeight="SemiBold"
+                    Foreground="{StaticResource TextPrimary}"
+                    VerticalAlignment="Center" />
+
+            </StackPanel>
+
+            <!-- Navigation -->
+            <ListBox
+                x:Name="SidebarMenu"
+                Grid.Row="1"
+                Classes="sidebar-menu"
+                SelectedIndex="0"
+                VerticalAlignment="Top"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                <ListBoxItem>
+                    <Grid ColumnDefinitions="24,*">
+                        <icons:MaterialIcon Kind="ViewDashboard" Width="20"/>
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="Übersicht"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center"/>
+                    </Grid>
+                </ListBoxItem>
+
+                <ListBoxItem>
+
+                    <Grid ColumnDefinitions="24,*">
+                        <icons:MaterialIcon Kind="Camera" Width="20" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="Datenempfang"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </ListBoxItem>
+
+                <ListBoxItem>
+                    <Grid ColumnDefinitions="24,*">
+                        <TextBlock Classes="menu-icon" Text="2" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="Unterpunkt 2"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </ListBoxItem>
+
+                <ListBoxItem>
+                    <Grid ColumnDefinitions="24,*">
+                        <TextBlock Classes="menu-icon" Text="3" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="Unterpunkt 3"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </ListBoxItem>
+
+                <!-- <ListBoxItem>
+                <Grid ColumnDefinitions="24,*">
+                <TextBlock Classes="menu-icon" Text="≡" />
+                <TextBlock
+                Grid.Column="1"
+                Text="Reports"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center" />
+                </Grid>
+                </ListBoxItem>
+
+                <ListBoxItem>
+                <Grid ColumnDefinitions="24,*">
+                <TextBlock Classes="menu-icon" Text="✎" />
+                <TextBlock
+                Grid.Column="1"
+                Text="Logbook"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center" />
+                </Grid>
+                </ListBoxItem>
+
+                <ListBoxItem>
+                <Grid ColumnDefinitions="24,*">
+                <TextBlock Classes="menu-icon" Text="?" />
+                <TextBlock
+                Grid.Column="1"
+                Text="Help"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center" />
+                </Grid>
+                </ListBoxItem>
+
+                <ListBoxItem>
+                <Grid ColumnDefinitions="24,*">
+                <TextBlock Classes="menu-icon" Text="⚙" />
+                <TextBlock
+                Grid.Column="1"
+                Text="Settings"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center" />
+                </Grid>
+                </ListBoxItem> -->
+
+            </ListBox>
+
+            <!-- Statuskarte unten -->
+            <!-- <Border
+            Grid.Row="2"
+            Background="{StaticResource CardDark}"
+            CornerRadius="20"
+            Padding="18">
+
+            <StackPanel Spacing="12">
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+
+            <Ellipse
+            Width="8"
+            Height="8"
+            Fill="#0BBBEF"
+            VerticalAlignment="Center" />
+
+            <TextBlock
+            Text="Exporting to grid"
+            Foreground="White"
+            FontSize="12"
+            FontWeight="SemiBold" />
+
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="5">
+
+            <TextBlock
+            Text="0.8"
+            Foreground="White"
+            FontSize="29" />
+
+            <TextBlock
+            Text="kW"
+            Foreground="#B8B8CC"
+            FontSize="14"
+            VerticalAlignment="Bottom"
+            Margin="0,0,0,5" />
+
+            </StackPanel>
+
+            <TextBlock
+            Text="Surplus after the house and the battery. Earning 15p per kWh."
+            Foreground="#B8B8CC"
+            FontSize="12"
+            TextWrapping="Wrap"
+            LineHeight="17" />
+
+            </StackPanel>
+
+            </Border> -->
+
+        </Grid>
+
+        <!-- Hier kommt später der Seiteninhalt hin -->
+        <ContentControl
+            x:Name="PageContent"
+            Grid.Column="1"
+            Margin="20,30,30,22"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch" />
+
+    </Grid>
 
 </Window>

@@ -479,6 +479,28 @@
           }
         }
       },
+      "Material.Icons/3.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Material.Icons.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Material.Icons.dll": {}
+        }
+      },
+      "Material.Icons.Avalonia/3.0.2": {
+        "type": "package",
+        "dependencies": {
+          "Avalonia": "12.0.0",
+          "Material.Icons": "3.0.2"
+        },
+        "compile": {
+          "lib/net8.0/Material.Icons.Avalonia.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0/Material.Icons.Avalonia.dll": {}
+        }
+      },
       "MicroCom.Runtime/0.11.7": {
         "type": "package",
         "compile": {
@@ -1293,6 +1315,32 @@
         "runtimes/win-x86/native/libHarfBuzzSharp.pdb"
       ]
     },
+    "Material.Icons/3.0.2": {
+      "sha512": "vzeJjXu0PWJSZDCG0lL8+xx4Zf3i+iKOmu4GjGXtgAex22JPKDOaYPUU77Fd21LEsKrkrAQ1cZ61mrHPX1Elsg==",
+      "type": "package",
+      "path": "material.icons/3.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/netstandard2.0/Material.Icons.dll",
+        "material.icons.3.0.2.nupkg.sha512",
+        "material.icons.nuspec"
+      ]
+    },
+    "Material.Icons.Avalonia/3.0.2": {
+      "sha512": "zXUS04QfxgSv0oMbsIf+6fZqcQbyh3L920Ucif8UHLaaFRK9E5R80ixUPnBpFRwGNe4sTDNhUS2Ti1T1wT3g5A==",
+      "type": "package",
+      "path": "material.icons.avalonia/3.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net8.0/Material.Icons.Avalonia.dll",
+        "material.icons.avalonia.3.0.2.nupkg.sha512",
+        "material.icons.avalonia.nuspec"
+      ]
+    },
     "MicroCom.Runtime/0.11.7": {
       "sha512": "zCwrbHqXE77aR5+fMh+WVDBfnAFSqwsC69pM9iutyuuxGWXAB0KeAhhX7akWsqRcXSbgRNvRsVweXP2zVeVaEg==",
       "type": "package",
@@ -1715,29 +1763,36 @@
       "Avalonia.Fonts.Inter >= 12.2.0",
       "Avalonia.Themes.Fluent2 >= 12.2.0",
       "AvaloniaUI.DiagnosticsSupport >= 2.2.3",
-      "CommunityToolkit.Mvvm >= 8.4.2"
+      "CommunityToolkit.Mvvm >= 8.4.2",
+      "Material.Icons.Avalonia >= 3.0.2"
     ]
   },
   "packageFolders": {
-    "/home/ssl/.nuget/packages/": {}
+    "C:\\Users\\dh10fre\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/ssl/Documents/github/informatik/Avalonia/Kontrollzentrum/Kontrollzentrum.csproj",
+      "projectUniqueName": "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
       "projectName": "Kontrollzentrum",
-      "projectPath": "/home/ssl/Documents/github/informatik/Avalonia/Kontrollzentrum/Kontrollzentrum.csproj",
-      "packagesPath": "/home/ssl/.nuget/packages/",
-      "outputPath": "/home/ssl/Documents/github/informatik/Avalonia/Kontrollzentrum/obj/",
+      "projectPath": "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
+      "packagesPath": "C:\\Users\\dh10fre\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/home/ssl/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\dh10fre\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
-        "/usr/lib/dotnet/library-packs": {},
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1756,7 +1811,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -1785,6 +1840,10 @@
           "CommunityToolkit.Mvvm": {
             "target": "Package",
             "version": "[8.4.2, )"
+          },
+          "Material.Icons.Avalonia": {
+            "target": "Package",
+            "version": "[3.0.2, )"
           }
         },
         "imports": [
@@ -1798,18 +1857,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.NETCore.App.Host.linux-x64",
-            "version": "[9.0.23, 9.0.23]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.115/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.321/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
