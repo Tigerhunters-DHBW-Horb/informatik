@@ -1,148 +1,41 @@
-using System;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Kontrollzentrum.Models;
-using Kontrollzentrum.Services;
+using Avalonia.Media;
 
 namespace Kontrollzentrum.ViewModels;
 
 public partial class ÜbersichtViewModel : ViewModelBase
 {
     [ObservableProperty]
-    private string multicastAddress = "224.5.23.2";
-
+    private int packetsPerSecond;
     [ObservableProperty]
-    private int port = 10020;
+    private IEffect? borderEffect;
 
-    [ObservableProperty]
-    private bool isReceiving;
-
-    [ObservableProperty]
-    private string status = "Gestoppt";
-
-    [ObservableProperty]
-    private string? errorMessage;
-
-    [ObservableProperty]
-    private double packetsPerSecond;
-
-    [ObservableProperty]
-    private double kilobytesPerSecond;
-
-    [ObservableProperty]
-    private long totalPackets;
-
-    [ObservableProperty]
-    private long totalBytes;
-
-    public bool CanEditConnection => !IsReceiving;
-
-    partial void OnIsReceivingChanged(bool value)
+    public ÜbersichtViewModel()
     {
-        OnPropertyChanged(nameof(CanEditConnection));
+        UDPListener.PacketsPerSecondChanged += UpdatePacketsPerSecond;
     }
 
-    [RelayCommand(IncludeCancelCommand = true)]
-    private async Task StartReceptionAsync(
-        CancellationToken cancellationToken)
+    private void UpdatePacketsPerSecond(int value)
     {
-        ErrorMessage = null;
-
-        if (!IPAddress.TryParse(
-                MulticastAddress,
-                out IPAddress? address))
+        Dispatcher.UIThread.Post(() =>
         {
-            ErrorMessage = "Die IP-Adresse ist ungültig.";
-            return;
-        }
-
-        byte[] addressBytes = address.GetAddressBytes();
-
-        if (addressBytes.Length != 4 ||
-            addressBytes[0] is < 224 or > 239)
-        {
-            ErrorMessage =
-                "Bitte eine IPv4-Multicast-Adresse eingeben.";
-            return;
-        }
-
-        if (Port is < 1 or > 65535)
-        {
-            ErrorMessage =
-                "Der Port muss zwischen 1 und 65535 liegen.";
-            return;
-        }
-
-        PacketsPerSecond = 0;
-        KilobytesPerSecond = 0;
-        TotalPackets = 0;
-        TotalBytes = 0;
-
-        IsReceiving = true;
-        Status = "Empfang gestartet / warte auf Daten";
-
-        var progress = new Progress<VisionReceptionStatistics>(
-            statistics =>
+            PacketsPerSecond = value;
+            if (value > 0)
             {
-                Dispatcher.UIThread.Post(() =>
+                BorderEffect = new DropShadowEffect
                 {
-                    // Verspätete Updates nach dem Stoppen ignorieren.
-                    if (!IsReceiving ||
-                        cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
-                    PacketsPerSecond =
-                        statistics.PacketsPerSecond;
-
-                    KilobytesPerSecond =
-                        statistics.KilobytesPerSecond;
-
-                    TotalPackets = statistics.TotalPackets;
-                    TotalBytes = statistics.TotalBytes;
-
-                    Status = statistics.PacketsPerSecond > 0
-                        ? "Daten werden empfangen"
-                        : "Warte auf Daten";
-                });
-            });
-
-        try
-        {
-            var receiver = new SslVisionReceiver();
-
-            await Task.Run(
-                () => receiver.RunAsync(
-                    address,
-                    Port,
-                    progress,
-                    cancellationToken),
-                cancellationToken);
-        }
-        catch (OperationCanceledException)
-            when (cancellationToken.IsCancellationRequested)
-        {
-            // Regulärer Abbruch über den Stop-Befehl.
-        }
-        catch (Exception exception)
-        {
-            ErrorMessage = exception.Message;
-        }
-        finally
-        {
-            IsReceiving = false;
-
-            PacketsPerSecond = 0;
-            KilobytesPerSecond = 0;
-
-            Status = ErrorMessage is null
-                ? "Gestoppt"
-                : "Empfang fehlgeschlagen";
-        }
+                    Color = Colors.LimeGreen,
+                    BlurRadius = 20,
+                    Opacity = 0.8,
+                    OffsetX = 0,
+                    OffsetY = 0,
+                };
+            }
+            else
+            {
+                BorderEffect = null;
+            }
+        });
     }
 }

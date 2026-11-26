@@ -19,44 +19,50 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        ThemeSwitch.IsChecked = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
+        // Theme Switch auf aktuellen Zustand setzen
+        if (Application.Current?.ActualThemeVariant == ThemeVariant.Dark) ThemeSwitch.IsChecked = true;
+        else ThemeSwitch.IsChecked = false;
+
         UpdateThemeIcon();
-        ThemeSwitch.IsCheckedChanged += OnThemeSwitchChanged;
 
-        // Erst nach dem Laden des XAML auf Auswahländerungen reagieren.
-        SidebarMenu.SelectionChanged += OnMenuSelectionChanged;
+        // Funktion UpdateThemeIcon dem Button ThemeSwitch zuweisen
+        ThemeSwitch.IsCheckedChanged += UpdateThemeIcon;
 
-        // Die bereits im XAML ausgewählte Seite anzeigen.
+        // Dem Seitenmenü bei Änderung eine Funktion zuweisen
+        SidebarMenu.SelectionChanged += ShowSelectedPage;
+
+        //Ausgewählte Seite anzeigen
         ShowSelectedPage();
     }
 
-    private void OnThemeSwitchChanged(object? sender, RoutedEventArgs e)
+    private void UpdateThemeIcon(object? sender = null, RoutedEventArgs? e = null)
     {
-        UpdateThemeIcon();
 
-        if (Application.Current is { } application)
+        if (ThemeSwitch.IsChecked == true)
         {
-            application.RequestedThemeVariant = ThemeSwitch.IsChecked == true
-                ? ThemeVariant.Dark
-                : ThemeVariant.Light;
+            DarkThemeIcon.IsVisible = true;
+            LightThemeIcon.IsVisible = false;
+        }
+        else
+        {
+            DarkThemeIcon.IsVisible = false;
+            LightThemeIcon.IsVisible = true;
+        }
+
+        if (Application.Current != null)
+        {
+            if (ThemeSwitch.IsChecked == true)
+            {
+                Application.Current.RequestedThemeVariant = ThemeVariant.Dark;
+            }
+            else
+            {
+                Application.Current.RequestedThemeVariant = ThemeVariant.Light;
+            }
         }
     }
 
-    private void UpdateThemeIcon()
-    {
-        var isDark = ThemeSwitch.IsChecked == true;
-        DarkThemeIcon.IsVisible = isDark;
-        LightThemeIcon.IsVisible = !isDark;
-    }
-
-    private void OnMenuSelectionChanged(
-        object? sender,
-        SelectionChangedEventArgs e)
-    {
-        ShowSelectedPage();
-    }
-
-    private void ShowSelectedPage()
+    private void ShowSelectedPage(object? sender = null, SelectionChangedEventArgs? e = null)
     {
         PageContent.Content = SidebarMenu.SelectedIndex switch
         {

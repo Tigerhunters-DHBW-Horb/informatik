@@ -1,0 +1,8 @@
+../Core/Src/kinematics.c:42:13:scale_targets_to_minimum_speeds	5
+../Core/Src/kinematics.c:57:17:pulse_for_wheel	5
+../Core/Src/kinematics.c:84:10:constrain_pwm	3
+../Core/Src/kinematics.c:91:13:kinematics_calculate	1
+../Core/Src/kinematics.c:100:13:drive_wheel_speeds_closed_loop	7
+../Core/Src/kinematics.c:157:6:drive_kinematics_closed_loop	1
+../Core/Src/kinematics.c:165:6:drive_kinematics_diagonal_closed_loop	1
+../Core/Src/kinematics.c:173:6:stop_robot	1

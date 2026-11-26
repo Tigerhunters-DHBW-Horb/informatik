@@ -1,0 +1,4 @@
+../Core/Src/hall_sensor_control.c:15:16:read_hall_raw	5
+../Core/Src/hall_sensor_control.c:37:6:hall_sensors_init	2
+../Core/Src/hall_sensor_control.c:49:6:hall_sensors_update	13
+../Core/Src/hall_sensor_control.c:79:6:hall_get_velocities	2

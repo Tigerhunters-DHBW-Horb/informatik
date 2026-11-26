@@ -16,6 +16,7 @@
             Padding="18"
             Background="{DynamicResource CardBackground}"
             BorderBrush="{DynamicResource CardBorder}"
+            Effect="{Binding BorderEffect}"
             BorderThickness="1"
             CornerRadius="20">
             <StackPanel Spacing="12">
@@ -44,27 +45,12 @@
                         Text="Multicast-Adresse"
                         VerticalAlignment="Center" />
 
-                    <TextBox
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        HorizontalAlignment="Right"
-                        HorizontalContentAlignment="Right"
-                        Text="{Binding MulticastAddress, Mode=TwoWay}"
-                        IsEnabled="{Binding CanEditConnection}" />
-
                     <TextBlock
                         Grid.Row="1"
                         Grid.Column="0"
                         Text="UDP-Port"
                         VerticalAlignment="Center" />
 
-                    <TextBox
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        HorizontalAlignment="Right"
-                        HorizontalContentAlignment="Right"
-                        Text="{Binding Port, Mode=TwoWay}"
-                        IsEnabled="{Binding CanEditConnection}" />
                 </Grid>
 
                 <Grid ColumnDefinitions="*,Auto">
@@ -88,7 +74,7 @@
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Column="1"
-                        Text="{Binding PacketsPerSecond, StringFormat={}{0:F1}}"
+                        Text="{Binding PacketsPerSecond}"
                         FontSize="16"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource TextPrimary}"
@@ -102,22 +88,12 @@
                         VerticalAlignment="Center" />
                     <TextBlock
                         Grid.Column="1"
-                        Text="{Binding KilobytesPerSecond, StringFormat={}{0:F1}}"
+                        Text=""
                         FontSize="16"
                         FontWeight="SemiBold"
                         Foreground="{DynamicResource TextPrimary}"
                         VerticalAlignment="Center" />
                 </Grid>
-
-                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                    <Button
-                        Content="Start"
-                        Command="{Binding StartReceptionCommand}" />
-
-                    <Button
-                        Content="Stop"
-                        Command="{Binding StartReceptionCancelCommand}" />
-                </StackPanel>
             </StackPanel>
         </Border>
         <Border

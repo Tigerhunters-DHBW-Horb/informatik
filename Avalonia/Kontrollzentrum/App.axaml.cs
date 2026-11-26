@@ -4,6 +4,8 @@ using Avalonia.Markup.Xaml;
 using Kontrollzentrum.ViewModels;
 using Kontrollzentrum.Views;
 
+using System.Threading.Tasks;
+
 namespace Kontrollzentrum;
 
 public partial class App : Application
@@ -22,6 +24,9 @@ public partial class App : Application
                 DataContext = new MainViewModel(),
             };
         }
+
+        // UDP Listener starten
+        Task.Run(UDPListener.StartListener);
 
         base.OnFrameworkInitializationCompleted();
     }

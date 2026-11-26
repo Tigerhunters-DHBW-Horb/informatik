@@ -1,0 +1,10 @@
+../Core/Src/Main.c:37:13:run_closed_loop_test	3
+../Core/Src/Main.c:71:5:main	2
+../Core/Src/Main.c:168:6:SystemClock_Config	4
+../Core/Src/Main.c:204:13:MX_I2C2_SMBUS_Init	4
+../Core/Src/Main.c:235:13:MX_TIM1_Init	11
+../Core/Src/Main.c:314:13:MX_TIM2_Init	6
+../Core/Src/Main.c:356:13:MX_TIM3_Init	4
+../Core/Src/Main.c:384:13:MX_TIM8_Init	1
+../Core/Src/Main.c:388:13:MX_GPIO_Init	1
+../Core/Src/Main.c:546:6:Error_Handler	1

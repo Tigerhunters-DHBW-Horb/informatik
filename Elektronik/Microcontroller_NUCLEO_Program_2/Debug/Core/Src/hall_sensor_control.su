@@ -1,0 +1,4 @@
+../Core/Src/hall_sensor_control.c:15:16:read_hall_raw	24	static
+../Core/Src/hall_sensor_control.c:37:6:hall_sensors_init	16	static
+../Core/Src/hall_sensor_control.c:49:6:hall_sensors_update	16	static
+../Core/Src/hall_sensor_control.c:79:6:hall_get_velocities	48	static,ignoring_inline_asm
