@@ -14,7 +14,7 @@ from udp_sender import UDP_PORT, RobotCommand, UdpSender
 
 POLL_INTERVAL_MS = 20
 SEND_INTERVAL_MS = 20
-MAX_LINEAR_SPEED_MPS = 5
+MAX_LINEAR_SPEED_MPS = 5.0
 STICK_DEADZONE = 0.08
 
 
@@ -183,7 +183,7 @@ class GamepadControlUI:
         self.broadcast_var = tk.StringVar(value="10.42.0.255")
         self.port_var = tk.StringVar(value=str(UDP_PORT))
         self.robot_id_var = tk.StringVar(value="0")
-        self.speed_var = tk.DoubleVar(value=0.3)
+        self.speed_var = tk.DoubleVar(value=1.0)
         self.omega_var = tk.DoubleVar(value=2.0)
         self.sprint_var = tk.DoubleVar(value=1.5)
         self.sneak_var = tk.DoubleVar(value=0.25)
@@ -222,7 +222,7 @@ class GamepadControlUI:
 
         settings = ttk.LabelFrame(self.root, text="Geschwindigkeiten", padding=8)
         settings.pack(fill="x", padx=12, pady=6)
-        self._scale(settings, "Normal (m/s)", self.speed_var, 0.1, 0.5, 0, 0)
+        self._scale(settings, "Normal (m/s)", self.speed_var, 0.1, 5.0, 0, 0)
         self._scale(settings, "Drehung (rad/s)", self.omega_var, 0.5, 2.0, 0, 2)
         self._scale(settings, "Sprint-Faktor", self.sprint_var, 1.1, 2.0, 1, 0)
         self._scale(settings, "Schleich-Faktor", self.sneak_var, 0.1, 0.5, 1, 2)

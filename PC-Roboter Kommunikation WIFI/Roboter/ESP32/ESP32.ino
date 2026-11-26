@@ -7,6 +7,9 @@
 // WLAN-Zugangsdaten des vom PC bereitgestellten Hotspots eintragen.
 const char *WIFI_SSID = "robocup";
 const char *WIFI_PASSWORD = "tigerhunters";
+const IPAddress ESP32_IP(10, 42, 0, 60);
+const IPAddress WIFI_GATEWAY(10, 42, 0, 1);
+const IPAddress WIFI_SUBNET(255, 255, 255, 0);
 
 constexpr uint8_t ROBOT_ID = 0;
 constexpr uint16_t UDP_PORT = 4210;
@@ -110,6 +113,12 @@ void setup() {
   NucleoSerial.begin(
       NUCLEO_BAUD_RATE, SERIAL_8N1, NUCLEO_UART_RX_PIN, NUCLEO_UART_TX_PIN);
   WiFi.mode(WIFI_STA);
+  if (!WiFi.config(ESP32_IP, WIFI_GATEWAY, WIFI_SUBNET)) {
+    Serial.println("Fehler: Statische ESP32-IP konnte nicht konfiguriert werden.");
+    while (true) {
+      delay(1000);
+    }
+  }
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   Serial.printf("Verbinde mit PC-Hotspot \"%s\"", WIFI_SSID);

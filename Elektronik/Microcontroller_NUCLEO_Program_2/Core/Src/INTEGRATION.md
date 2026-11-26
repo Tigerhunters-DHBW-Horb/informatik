@@ -1,69 +1,50 @@
-# SSL T3100 – ESC Bring-up-Test (Integration)
+# SSL T3100 – Nucleo-Ansteuerung per ESP32
 
-Reiner MC-Test auf der **NUCLEO-H753ZI**, ohne Vision, ohne Kickerboard.
-Feste, automatische Sequenz für die 4 Antriebs-ESCs (M1–M4), Start per
-Tastendruck, Not-Aus per Tastendruck, **Roboter aufgebockt**.
+Der ESP32 nimmt die Roboterbefehle per UDP entgegen und leitet sie über UART1
+an die **NUCLEO-H753ZI** weiter. Die Nucleo-Firmware setzt die empfangenen
+Geschwindigkeiten mit Kinematik, Hall-Sensoren und PID-Reglern in vier
+Motorbefehle um.
 
-## Dateien
-| Datei | Inhalt |
-|------|--------|
-| `test_config.h` | **Alle** Einstellungen (Pins, Timer, Zeiten, Limits) |
-| `esc_driver.h/.c` | ESC-Treiber (TIM1-PWM, Arm, Set, Stopp) |
-| `motor_test.h/.c` | Testsequenz als nicht-blockierende Zustandsmaschine |
-| `battery_mon.c` | Optionaler INA226-Unterspannungsschutz (Default: aus) |
+## UART-Verbindung
 
-Dateien ins Projekt unter `Core/Src` bzw. `Core/Inc` kopieren.
+| ESP32 | NUCLEO-H753ZI | Funktion |
+|-------|---------------|----------|
+| GPIO2 (UART1 TX) | PB7 (USART1 RX) | Befehle zum Nucleo |
+| GND | GND | Gemeinsame Masse |
 
-## CubeMX-Konfiguration
-1. **TIM1** → PWM Generation auf den vier Kanälen entsprechend Pinout
-   (PA8=CH1, PA11=CH4, PA10=CH3, PA9=CH2). PSC/ARR setzt der Code selbst.
-2. **USART3** (ST-LINK VCP, PD8/PD9) → Asynchronous, **115200** Baud.
-3. **GPIO Button** PG10 → Input, Pull-Up (active-low).
-4. **GPIO LED** PB0 → Output (oder gewünschten LED-Pin in `test_config.h`).
-5. *(optional)* **I2C2** (PF0/PF1) für INA226, falls Batteriemonitor genutzt.
+Die UART-Verbindung verwendet **115200 Baud, 8N1** und 3,3-V-Logik. PB7 wird
+als USART1-RX mit Alternate Function 7 konfiguriert. Die Leitung zum Nucleo ist
+nur empfangend; USART1-TX wird nicht verwendet.
 
-## main.c
-```c
-/* USER CODE BEGIN Includes */
-#include "motor_test.h"
-/* USER CODE END Includes */
+## Befehlsformat
 
-int main(void)
-{
-  /* ... CubeMX-Inits (HAL_Init, Clock, MX_TIM1_Init, MX_USART3_UART_Init, ...) */
+Der ESP32 sendet pro empfangenem Roboterbefehl eine ASCII-Zeile mit `\n`:
 
-  /* USER CODE BEGIN 2 */
-  motor_test_init();
-  /* USER CODE END 2 */
-
-  while (1)
-  {
-    /* USER CODE BEGIN 3 */
-    motor_test_run();     /* nicht-blockierend, so oft wie möglich aufrufen */
-    /* USER CODE END 3 */
-  }
-}
+```text
+RBT1,<roboter-id>,<vx>,<vy>,<omega>\n
 ```
 
-## Vor dem ersten Einschalten unbedingt prüfen
-- [ ] **AM32 im Bidirectional-/3D-Mode** (sonst ist 1500 µs nicht „Stopp"
-      und Rückwärts geht nicht). Per AM32-Configurator prüfen.
-- [ ] **`ESC_TIM_CLOCK_HZ`** in `test_config.h` an die echte TIM1-Taktrate
-      anpassen (CubeMX → Clock Configuration). Falsch = falsche Pulsbreiten!
-- [ ] **Kanal-Zuordnung M1–M4** gegen die echte Verdrahtung prüfen
-      (im Pinout mit „VERIFY" markiert).
-- [ ] Propeller… ähm, **Räder frei** (aufgebockt), Umgebung frei.
-- [ ] Erst mit `TEST_THROTTLE_MAX = 0.15` (15 %) testen, dann vorsichtig
-      erhöhen.
+`vx` und `vy` sind lineare Geschwindigkeiten in m/s, `omega` ist die
+Drehgeschwindigkeit in rad/s. Beispiel:
 
-## Ablauf
-1. Reset → ESCs disarmed, LED blinkt langsam, Statusausgabe über VCP.
-2. Taste → Arming (2 s) → Motor 1 vor/zurück → … → Motor 4 → alle zusammen.
-3. Fertig: Dauerlicht, „PASS"-Meldung. Taste = neuer Durchlauf.
-4. **Taste während des Laufs = NOT-AUS** (alle Motoren sofort Stopp).
+```text
+RBT1,0,0.500000,0.000000,0.000000
+```
 
-## Spätere Erweiterung
-- `CFG_ENABLE_BATTERY_MON = 1` für INA226-Unterspannungsschutz (erst wenn
-  I2C2 verifiziert ist).
-- Throttle-Limit für den Bodentest schrittweise anheben.
-- Danach: Hall/Encoder-Feedback → echte Drehzahlmessung & -regelung.
+Die Nucleo-Firmware nimmt ID `0`, lineare Sollwerte bis ±5 m/s sowie
+Drehgeschwindigkeiten bis ±6 rad/s an. Ungültige Zeilen und andere IDs werden
+ignoriert. Nach 250 ms ohne gültigen Befehl wird beim nächsten 20-ms-Regeltakt
+ein Stopp-Sollwert an die Motorsteuerung übergeben.
+
+## Motorsteuerung und Inbetriebnahme
+
+- Die UART-Befehle laufen nach dem ESC-Arm-Intervall in die bestehende
+  Closed-Loop-Kinematik; Hall-Sensoren und vier PID-Regler steuern die
+  einzelnen Räder.
+- `TEST_THROTTLE_MAX` in `Core/Inc/test_config.h` begrenzt den ESC-Ausgang
+  aktuell auf 15 %. Für erste Tests Räder freiheben und diese Begrenzung
+  beibehalten.
+- Vor dem Einschalten AM32-Bidirectional-/3D-Modus, TIM1-Taktfrequenz in
+  `ESC_TIM_CLOCK_HZ` und die Zuordnung M1–M4 zum Pinout prüfen.
+- Die ESCs erhalten nach Reset zunächst 1500 µs für drei Sekunden. Ohne
+  gültige UART-Befehle bleiben die Motoren auf Stopp.

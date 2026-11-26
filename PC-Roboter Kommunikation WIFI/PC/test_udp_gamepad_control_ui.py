@@ -17,9 +17,9 @@ class GamepadCommandTests(unittest.TestCase):
         self.assertEqual((command.vx, command.vy, command.omega), (0.0, 0.0, 0.0))
 
     def test_right_trigger_sprint_respects_firmware_cap(self):
-        command = command_from_gamepad(0, (0.0, -1.0, 0.0, 0.0, 1.0), 0.4, 2.0, 2.0, 0.25)
+        command = command_from_gamepad(0, (0.0, -1.0, 0.0, 0.0, 1.0), 3.0, 2.0, 2.0, 0.25)
 
-        self.assertEqual(command.vx, 0.5)
+        self.assertEqual(command.vx, 5.0)
 
     def test_left_trigger_sneak_takes_priority(self):
         command = command_from_gamepad(0, (0.0, -1.0, 0.0, 1.0, 1.0), 0.4, 2.0, 2.0, 0.25)

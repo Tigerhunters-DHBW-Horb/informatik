@@ -6,6 +6,17 @@
 #include "kinematics.h"
 #include "hall_sensor_control.h"
 #include "pid.h"
+#include <math.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define ROBOT_ID 0U
+#define UART_COMMAND_TIMEOUT_MS 250U
+#define DRIVE_CONTROL_PERIOD_MS 20U
+#define UART_COMMAND_LINE_CAPACITY 64U
+#define MAX_LINEAR_COMMAND_MPS 5.0f
+#define MAX_ANGULAR_COMMAND_RAD_S 6.0f
 
 /* Globale Variablen für den Live-Debugger */
 volatile uint8_t hall_m1 = 0;
@@ -16,7 +27,7 @@ volatile uint8_t hall_m4 = 0;
 /* USER CODE END PV */
 
 /* Private variables ---------------------------------------------------------*/
-COM_InitTypeDef BspCOMInit;
+UART_HandleTypeDef huart1;
 SMBUS_HandleTypeDef hsmbus2;
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
@@ -25,6 +36,7 @@ TIM_HandleTypeDef htim3;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART1_UART_Init(void);
 static void MX_I2C2_SMBUS_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM3_Init(void);
@@ -34,135 +46,309 @@ static void MX_TIM2_Init(void);
 // 4 PID-Regler (für jedes Rad einen)
 PID_Controller pid_vl, pid_vr, pid_hl, pid_hr;
 
-static void run_closed_loop_test(void)
+static uint8_t uart_rx_byte;
+static volatile char uart_rx_line[UART_COMMAND_LINE_CAPACITY];
+static volatile uint8_t uart_rx_length;
+static volatile uint8_t uart_line_ready;
+static volatile uint8_t uart_discard_line;
+static volatile uint8_t uart_rx_restart_pending;
+static volatile uint8_t uart_rx_failed;
+
+static float command_vx;
+static float command_vy;
+static float command_omega;
+static uint32_t last_command_tick;
+static bool has_robot_command;
+
+static bool parse_float_field(const char **cursor, float *value, char delimiter)
 {
-    uint32_t start_time = HAL_GetTick();
-    uint32_t last_tick = start_time;
+    char *end;
+    float parsed_value = strtof(*cursor, &end);
 
-    while ((HAL_GetTick() - start_time) < 3000U) // TIMEEE
+    if (end == *cursor || *end != delimiter || !isfinite(parsed_value))
     {
-        hall_sensors_update();
-
-        uint32_t now = HAL_GetTick();
-        uint32_t elapsed_ms = now - last_tick;
-        if (elapsed_ms >= 50U)
-        {
-            last_tick = now;
-
-  // ---------------------------------------
-            // Vorwärtsfahrt:
-             drive_kinematics_closed_loop(3.0f, 0.0f, 0.0f, (float)elapsed_ms / 1000.0f);
-
-            // Diagonal vorwärts-links (x=vorwärts, y=links), über Kinematik.
-            //drive_kinematics_diagonal_closed_loop(
-                //1.0f, 1.0f, 0.0f, (float)elapsed_ms / 1000.0f);
-        }
-
-        HAL_Delay(1U);
+        return false;
     }
 
-    stop_robot();
-    debug_pwm_vl = ESC_PULSE_STOP_US;
-    debug_pwm_vr = ESC_PULSE_STOP_US;
-    debug_pwm_hl = ESC_PULSE_STOP_US;
-    debug_pwm_hr = ESC_PULSE_STOP_US;
+    *value = parsed_value;
+    *cursor = end;
+    if (delimiter != '\0')
+    {
+        ++(*cursor);
+    }
+    return true;
+}
+
+static bool parse_robot_command(const char *line, uint8_t *robot_id,
+                                float *vx, float *vy, float *omega)
+{
+    static const char prefix[] = "RBT1,";
+    if (strncmp(line, prefix, sizeof(prefix) - 1U) != 0)
+    {
+        return false;
+    }
+
+    const char *cursor = line + sizeof(prefix) - 1U;
+    char *end;
+    unsigned long parsed_id = strtoul(cursor, &end, 10);
+    if (end == cursor || *end != ',' || parsed_id > UINT8_MAX)
+    {
+        return false;
+    }
+
+    cursor = end + 1;
+    float parsed_vx;
+    float parsed_vy;
+    float parsed_omega;
+    if (!parse_float_field(&cursor, &parsed_vx, ',') ||
+        !parse_float_field(&cursor, &parsed_vy, ',') ||
+        !parse_float_field(&cursor, &parsed_omega, '\0') ||
+        fabsf(parsed_vx) > MAX_LINEAR_COMMAND_MPS ||
+        fabsf(parsed_vy) > MAX_LINEAR_COMMAND_MPS ||
+        fabsf(parsed_omega) > MAX_ANGULAR_COMMAND_RAD_S)
+    {
+        return false;
+    }
+
+    *robot_id = (uint8_t)parsed_id;
+    *vx = parsed_vx;
+    *vy = parsed_vy;
+    *omega = parsed_omega;
+    return true;
+}
+
+static bool take_uart_line(char *line)
+{
+    if (uart_line_ready == 0U)
+    {
+        return false;
+    }
+
+    HAL_NVIC_DisableIRQ(USART1_IRQn);
+    if (uart_line_ready == 0U)
+    {
+        HAL_NVIC_EnableIRQ(USART1_IRQn);
+        return false;
+    }
+
+    uint8_t index = 0U;
+    do
+    {
+        line[index] = uart_rx_line[index];
+    } while (line[index++] != '\0' && index < UART_COMMAND_LINE_CAPACITY);
+    uart_line_ready = 0U;
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+    return true;
+}
+
+static void process_uart_command(void)
+{
+    char line[UART_COMMAND_LINE_CAPACITY];
+    while (take_uart_line(line))
+    {
+        uint8_t robot_id;
+        float vx;
+        float vy;
+        float omega;
+        if (parse_robot_command(line, &robot_id, &vx, &vy, &omega) &&
+            robot_id == ROBOT_ID)
+        {
+            command_vx = vx;
+            command_vy = vy;
+            command_omega = omega;
+            last_command_tick = HAL_GetTick();
+            has_robot_command = true;
+        }
+    }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance != USART1)
+    {
+        return;
+    }
+
+    uint8_t received = uart_rx_byte;
+    if (received == '\n')
+    {
+        if (uart_line_ready == 0U && uart_discard_line == 0U)
+        {
+            uart_rx_line[uart_rx_length] = '\0';
+            uart_line_ready = 1U;
+        }
+        uart_rx_length = 0U;
+        uart_discard_line = 0U;
+    }
+    else if (received != '\r' && uart_line_ready == 0U &&
+             uart_discard_line == 0U)
+    {
+        if (received < 0x20U || received > 0x7eU)
+        {
+            uart_rx_length = 0U;
+            uart_discard_line = 1U;
+        }
+        else if (uart_rx_length < UART_COMMAND_LINE_CAPACITY - 1U)
+        {
+            uart_rx_line[uart_rx_length++] = (char)received;
+        }
+        else
+        {
+            uart_rx_length = 0U;
+            uart_discard_line = 1U;
+        }
+    }
+
+    if (HAL_UART_Receive_IT(huart, &uart_rx_byte, 1U) != HAL_OK)
+    {
+        uart_rx_failed = 1U;
+    }
+    else
+    {
+        uart_rx_restart_pending = 0U;
+    }
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART1)
+    {
+        uart_rx_length = 0U;
+        uart_discard_line = 1U;
+        if (huart->RxState == HAL_UART_STATE_READY)
+        {
+            if (HAL_UART_Receive_IT(huart, &uart_rx_byte, 1U) != HAL_OK)
+            {
+                uart_rx_failed = 1U;
+            }
+        }
+        else
+        {
+            uart_rx_restart_pending = 1U;
+        }
+    }
 }
 
 int main(void)
 {
     /* 1. MCU Configuration */
 
-	HAL_Init();
+    HAL_Init();
     SystemClock_Config();
     MX_GPIO_Init();
     MX_TIM1_Init();
+    MX_USART1_UART_Init();
+    if (HAL_UART_Receive_IT(&huart1, &uart_rx_byte, 1U) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
     esc_init();
     hall_sensors_init();
 
-
-   //SO perfekter regler für vorwärtsfahrt aber 5. stelle sollte am besten 0 sein
-   /* pid_init(&pid_vl, 12.0f, 1.0f, 0.0f, 10.0f, 60.0f);
-    pid_init(&pid_vr, 18.0f, 2.0f, 0.0f, 10.0f, 60.0f);
-    pid_init(&pid_hl, 25.0f, 4.0f, 0.0f, 17.0f, 60.0f);
-    pid_init(&pid_hr, 25.0f, 4.0f, 0.0f, 17.0f, 60.0f); */
-
-   //   Für Vorwärtsfahrt 2.0
-   pid_init(&pid_vl, 23.0f, 12.0f, 0.0f, -50.0f, 150.0f);
+    pid_init(&pid_vl, 23.0f, 12.0f, 0.0f, -50.0f, 150.0f);
     pid_init(&pid_vr, 23.0f, 12.0f, 0.0f, -50.0f, 150.0f);
     pid_init(&pid_hl, 30.0f, 15.0f, 0.0f, -50.0f, 200.0f);
     pid_init(&pid_hr, 30.0f, 15.0f, 0.0f, -50.0f, 200.0f);
 
-
-
-
-    /* 5. 3 Sekunden warten (ESCs empfangen jetzt 1500 µs und piepen nicht mehr) */
-    HAL_Delay(3000);
-
-    /* Short closed-loop test; keep the robot raised during this test. */
-    run_closed_loop_test();
-
-    /* --- STOPP --- */
-    stop_robot();
-    debug_pwm_vl = ESC_PULSE_STOP_US;
-    debug_pwm_vr = ESC_PULSE_STOP_US;
-    debug_pwm_hl = ESC_PULSE_STOP_US;
-    debug_pwm_hr = ESC_PULSE_STOP_US;
-
-    /* Diagnosemodus: Motoren auf Stopp halten und Hall-Sensoren abfragen. */
-    uint32_t last_measure_tick = HAL_GetTick();
+    HAL_Delay(3000U);
+    uint32_t last_control_tick = HAL_GetTick();
     while (1)
     {
-        stop_robot();
         hall_sensors_update();
+        hall_m1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15) |
+                  (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_7) << 1) |
+                  (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_6) << 2);
+        hall_m2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) |
+                  (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_6) << 1) |
+                  (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_5) << 2);
+        hall_m3 = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_12) |
+                  (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_9) << 1) |
+                  (HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1) << 2);
+        hall_m4 = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_8) |
+                  (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_5) << 1) |
+                  (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_6) << 2);
 
-        // Hall sensors Debug
-               // Lese Motor 1 (PA15, PF7, PF6)
-                   hall_m1 = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_15) |
-                            (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_7) << 1) |
-                            (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_6) << 2);
-
-                   // Lese Motor 2 (PC8, PC6, PC5)
-                   hall_m2 = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) |
-                            (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_6) << 1) |
-                            (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_5) << 2);
-
-                   // Lese Motor 3 (PG12, PG9, PE1)
-                   hall_m3 = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_12) |
-                            (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_9) << 1) |
-                            (HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1) << 2);
-
-                   // Lese Motor 4 (PG8, PG5, PG6)
-                   hall_m4 = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_8) |
-                            (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_5) << 1) |
-                            (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_6) << 2);
-
+        process_uart_command();
         uint32_t now = HAL_GetTick();
-        if ((now - last_measure_tick) >= 50U)
+        if (uart_rx_restart_pending != 0U &&
+            huart1.RxState == HAL_UART_STATE_READY)
         {
-            float elapsed_seconds = (float)(now - last_measure_tick) / 1000.0f;
-            float v_vl = 0.0f;
-            float v_vr = 0.0f;
-            float v_hl = 0.0f;
-            float v_hr = 0.0f;
-
-            last_measure_tick = now;
-            hall_get_velocities(elapsed_seconds, &v_vl, &v_vr, &v_hl, &v_hr);
-
-            debug_v_vl_roh = v_vl;
-            debug_v_vr_roh = v_vr;
-            debug_v_hl_roh = v_hl;
-            debug_v_hr_roh = v_hr;
-
-            debug_v_vl = -v_vl;
-            debug_v_vr = -v_vr;
-            debug_v_hl = -v_hl;
-            debug_v_hr = -v_hr;
+            HAL_NVIC_DisableIRQ(USART1_IRQn);
+            if (uart_rx_restart_pending != 0U &&
+                huart1.RxState == HAL_UART_STATE_READY)
+            {
+                uart_rx_restart_pending = 0U;
+                if (HAL_UART_Receive_IT(&huart1, &uart_rx_byte, 1U) != HAL_OK)
+                {
+                    uart_rx_failed = 1U;
+                }
+            }
+            HAL_NVIC_EnableIRQ(USART1_IRQn);
+        }
+        if (uart_rx_failed != 0U)
+        {
+            has_robot_command = false;
         }
 
-        HAL_Delay(1);
+        uint32_t elapsed_ms = now - last_control_tick;
+        if (elapsed_ms >= DRIVE_CONTROL_PERIOD_MS)
+        {
+            last_control_tick = now;
+            float dt = (float)elapsed_ms / 1000.0f;
+            if (has_robot_command &&
+                (now - last_command_tick) <= UART_COMMAND_TIMEOUT_MS)
+            {
+                drive_kinematics_closed_loop(command_vx, command_vy,
+                                             command_omega, dt);
+            }
+            else
+            {
+                has_robot_command = false;
+                command_vx = 0.0f;
+                command_vy = 0.0f;
+                command_omega = 0.0f;
+                drive_kinematics_closed_loop(0.0f, 0.0f, 0.0f, dt);
+            }
+        }
+        HAL_Delay(1U);
     }
 }
 
+
+static void MX_USART1_UART_Init(void)
+{
+    GPIO_InitTypeDef gpio = {0};
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_USART1_CLK_ENABLE();
+
+    gpio.Pin = GPIO_PIN_7;
+    gpio.Mode = GPIO_MODE_AF_PP;
+    gpio.Pull = GPIO_PULLUP;
+    gpio.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    gpio.Alternate = GPIO_AF7_USART1;
+    HAL_GPIO_Init(GPIOB, &gpio);
+
+    huart1.Instance = USART1;
+    huart1.Init.BaudRate = 115200U;
+    huart1.Init.WordLength = UART_WORDLENGTH_8B;
+    huart1.Init.StopBits = UART_STOPBITS_1;
+    huart1.Init.Parity = UART_PARITY_NONE;
+    huart1.Init.Mode = UART_MODE_RX;
+    huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huart1.Init.OverSampling = UART_OVERSAMPLING_8;
+    huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+    huart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+    huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+    if (HAL_UART_Init(&huart1) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    HAL_NVIC_SetPriority(USART1_IRQn, 5U, 0U);
+    HAL_NVIC_EnableIRQ(USART1_IRQn);
+}
 
 
 void SystemClock_Config(void)

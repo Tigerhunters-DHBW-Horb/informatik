@@ -62,7 +62,7 @@ class RobotControlUI:
         self.broadcast_var = tk.StringVar(value="10.42.0.255")
         self.port_var = tk.StringVar(value=str(UDP_PORT))
         self.robot_id_var = tk.StringVar(value="0")
-        self.speed_var = tk.DoubleVar(value=0.5)
+        self.speed_var = tk.DoubleVar(value=1.0)
         self.omega_var = tk.DoubleVar(value=2.0)
         self.status_var = tk.StringVar(value="Gestoppt")
 
@@ -97,7 +97,7 @@ class RobotControlUI:
             settings,
             variable=self.speed_var,
             from_=0.1,
-            to=1.5,
+            to=5.0,
             resolution=0.1,
             orient=tk.HORIZONTAL,
             length=220,
