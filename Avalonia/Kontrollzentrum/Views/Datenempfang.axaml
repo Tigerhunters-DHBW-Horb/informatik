@@ -1,0 +1,21 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kontrollzentrum.ViewModels"
+    x:Class="Kontrollzentrum.Views.Datenempfang"
+    x:DataType="vm:ÜbersichtViewModel">
+
+    <ListBox ItemsSource="{Binding Positions}">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="15">
+                    <TextBlock Text="{Binding Team}" Width="60" />
+                    <TextBlock Text="{Binding RobotId}" Width="60" />
+                    <TextBlock Text="{Binding X}" Width="100" />
+                    <TextBlock Text="{Binding Y}" Width="100" />
+                </StackPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+
+</UserControl>

@@ -281,3 +281,4 @@ C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\obj\Debug\net9.0\ref
 C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\obj\Debug\net9.0\Kontrollzentrum.pdb
 C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\obj\Debug\net9.0\Kontrollzentrum.genruntimeconfig.cache
 C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\obj\Debug\net9.0\ref\Kontrollzentrum.dll
+C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\bin\Debug\net9.0\Google.Protobuf.dll

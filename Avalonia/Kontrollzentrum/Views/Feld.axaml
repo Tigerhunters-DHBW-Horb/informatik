@@ -1,0 +1,11 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Kontrollzentrum.ViewModels"
+    xmlns:local="using:Kontrollzentrum"
+    x:Class="Kontrollzentrum.Views.Feld"
+    x:DataType="vm:ÜbersichtViewModel">
+
+    <local:FieldRender x:Name="Spielfeld" />
+
+</UserControl>

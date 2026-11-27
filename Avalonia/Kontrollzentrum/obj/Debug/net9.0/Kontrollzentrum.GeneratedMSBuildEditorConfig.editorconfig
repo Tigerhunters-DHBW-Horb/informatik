@@ -10,7 +10,7 @@ build_property.AvaloniaPropertyGeneratorIsEnabled = true
 build_property.AvaloniaUseCompiledBindingsByDefault = true
 build_property.AvaloniaMainPackageVersion = 12.2.0
 build_property.AvaloniaPreviewerNetCoreToolPath = C:\Users\dh10fre\.nuget\packages\avalonia\12.2.0\buildTransitive\\..\tools\net8.0\designer\Avalonia.Designer.HostApp.dll
-build_property.AvaloniaResourcePaths = C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Assets\avalonia-logo.ico,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\App.axaml,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Views\MainWindow.axaml,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Views\ÜbersichtView.axaml
+build_property.AvaloniaResourcePaths = C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Assets\avalonia-logo.ico,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\App.axaml,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Views\Datenempfang.axaml,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Views\Feld.axaml,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Views\MainWindow.axaml,C:\Users\dh10fre\github\informatik\Avalonia\Kontrollzentrum\Views\Übersicht.axaml
 build_property.MvvmToolkitEnableINotifyPropertyChangingSupport = true
 build_property._MvvmToolkitIsUsingWindowsRuntimePack = false
 build_property.CsWinRTComponent = 
@@ -34,8 +34,14 @@ build_property.EnableCodeStyleSeverity =
 [C:/Users/dh10fre/github/informatik/Avalonia/Kontrollzentrum/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[C:/Users/dh10fre/github/informatik/Avalonia/Kontrollzentrum/Views/Datenempfang.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/dh10fre/github/informatik/Avalonia/Kontrollzentrum/Views/Feld.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [C:/Users/dh10fre/github/informatik/Avalonia/Kontrollzentrum/Views/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/dh10fre/github/informatik/Avalonia/Kontrollzentrum/Views/ÜbersichtView.axaml]
+[C:/Users/dh10fre/github/informatik/Avalonia/Kontrollzentrum/Views/Übersicht.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

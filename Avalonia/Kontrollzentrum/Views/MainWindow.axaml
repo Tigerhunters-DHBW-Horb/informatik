@@ -2,13 +2,14 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+    xmlns:views="using:Kontrollzentrum.Views"
     x:Class="Kontrollzentrum.Views.MainWindow"
     Title="Kontrollzentrum"
     Width="1100"
     Height="720"
     MinWidth="700"
     MinHeight="600"
-    WindowStartupLocation="CenterScreen"
+    WindowStartupLocation="Manual"
     Background="{DynamicResource WindowBackground}">
 
     <!-- Farben und Maße zentral definieren -->
@@ -31,7 +32,7 @@
                     <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver">#97A59A</SolidColorBrush>
                     <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver">#525353</SolidColorBrush>
                     <SolidColorBrush x:Key="ToggleButtonBackgroundChecked">Transparent</SolidColorBrush>
-<SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver">Transparent</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver">Transparent</SolidColorBrush>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="WindowBackground">#1B1A18</SolidColorBrush>
@@ -49,7 +50,7 @@
                     <SolidColorBrush x:Key="ToggleSwitchFillOnPointerOver">#756858</SolidColorBrush>
                     <SolidColorBrush x:Key="ToggleSwitchStrokeOnPointerOver">#B8A88E</SolidColorBrush>
                     <SolidColorBrush x:Key="ToggleButtonBackgroundChecked">Transparent</SolidColorBrush>
-<SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver">Transparent</SolidColorBrush>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver">Transparent</SolidColorBrush>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
@@ -196,10 +197,10 @@
 
                 <ListBoxItem>
                     <Grid ColumnDefinitions="24,*">
-                        <TextBlock Classes="menu-icon" Text="2" />
+                        <icons:MaterialIcon Kind="SoccerField" Width="20" />
                         <TextBlock
                             Grid.Column="1"
-                            Text="Unterpunkt 2"
+                            Text="Feld"
                             Margin="12,0,0,0"
                             VerticalAlignment="Center" />
                     </Grid>

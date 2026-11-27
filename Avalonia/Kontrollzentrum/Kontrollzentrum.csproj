@@ -9,6 +9,9 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <Protobuf Include="Protobuf\ssl_vision_detection.proto" GrpcServices="None" />
+    <Protobuf Include="Protobuf\ssl_vision_geometry.proto" GrpcServices="None" />
+    <Protobuf Include="Protobuf\ssl_vision_wrapper.proto" GrpcServices="None" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +24,13 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Google.Protobuf" Version="3.36.2" />
+    <PackageReference Include="Grpc.Tools" Version="2.85.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Material.Icons.Avalonia" Version="3.0.2" />
   </ItemGroup>
+
+
 </Project>

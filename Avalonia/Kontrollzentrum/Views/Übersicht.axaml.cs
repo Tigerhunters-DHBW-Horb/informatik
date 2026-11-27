@@ -3,12 +3,11 @@ using Kontrollzentrum.ViewModels;
 
 namespace Kontrollzentrum.Views;
 
-public partial class ÜbersichtView : UserControl
+public partial class Übersicht : UserControl
 {
-    public ÜbersichtView()
+    public Übersicht()
     {
         InitializeComponent();
 
-        DataContext = new ÜbersichtViewModel();
     }
 }

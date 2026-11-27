@@ -1,8 +1,11 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Avalonia.Media;
+using System.Collections.ObjectModel;
+//using Kontrollzentrum.Protobuf;
 
 namespace Kontrollzentrum.ViewModels;
+
 
 public partial class ÜbersichtViewModel : ViewModelBase
 {
@@ -10,10 +13,12 @@ public partial class ÜbersichtViewModel : ViewModelBase
     private int packetsPerSecond;
     [ObservableProperty]
     private IEffect? borderEffect;
+    public ObservableCollection<SSL_DetectionRobot_Liste> Positions { get; } = new();
 
     public ÜbersichtViewModel()
     {
         UDPListener.PacketsPerSecondChanged += UpdatePacketsPerSecond;
+        UDPListener.DataReceived += UpdatePositions;
     }
 
     private void UpdatePacketsPerSecond(int value)
@@ -36,6 +41,39 @@ public partial class ÜbersichtViewModel : ViewModelBase
             {
                 BorderEffect = null;
             }
+        });
+    }
+
+    private void UpdatePositions(SSL_DetectionFrame data)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            Positions.Clear();
+
+            foreach (SSL_DetectionRobot robot in data.RobotsYellow)
+            {
+                AddRobot(robot, "Gelb");
+            }
+
+            foreach (SSL_DetectionRobot robot in data.RobotsBlue)
+            {
+                AddRobot(robot, "Blau");
+            }
+        });
+    }
+    private void AddRobot(SSL_DetectionRobot robot, string team)
+    {
+        Positions.Add(new SSL_DetectionRobot_Liste
+        {
+            Team = team,
+            Confidence = robot.Confidence,
+            RobotId = robot.RobotId,
+            X = robot.X,
+            Y = robot.Y,
+            Orientation = robot.Orientation,
+            PixelX = robot.PixelX,
+            PixelY = robot.PixelY,
+            Height = robot.Height
         });
     }
 }
