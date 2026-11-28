@@ -2,6 +2,8 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Avalonia.Media;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Diagnostics;
 //using Kontrollzentrum.Protobuf;
 
 namespace Kontrollzentrum.ViewModels;
@@ -14,6 +16,10 @@ public partial class ÜbersichtViewModel : ViewModelBase
     [ObservableProperty]
     private IEffect? borderEffect;
     public ObservableCollection<SSL_DetectionRobot_Liste> Positions { get; } = new();
+    private readonly object _frameLock = new();
+
+    private SSL_DetectionFrame? _latestPacket;
+    private bool _updateScheduled;
 
     public ÜbersichtViewModel()
     {
@@ -46,34 +52,63 @@ public partial class ÜbersichtViewModel : ViewModelBase
 
     private void UpdatePositions(SSL_DetectionFrame data)
     {
-        Dispatcher.UIThread.Post(() =>
+        lock (_frameLock)
         {
-            Positions.Clear();
+            // Einen noch nicht verarbeiteten Frame ersetzen.
+            _latestPacket = data;
 
-            foreach (SSL_DetectionRobot robot in data.RobotsYellow)
-            {
-                AddRobot(robot, "Gelb");
-            }
+            if (_updateScheduled)
+                return;
 
-            foreach (SSL_DetectionRobot robot in data.RobotsBlue)
-            {
-                AddRobot(robot, "Blau");
-            }
-        });
+            _updateScheduled = true;
+        }
+
+        Dispatcher.UIThread.Post(ProcessLatestFrame);
     }
-    private void AddRobot(SSL_DetectionRobot robot, string team)
+
+    private void ProcessLatestFrame()
     {
-        Positions.Add(new SSL_DetectionRobot_Liste
+        SSL_DetectionFrame? frame;
+
+        lock (_frameLock)
         {
-            Team = team,
-            Confidence = robot.Confidence,
-            RobotId = robot.RobotId,
-            X = robot.X,
-            Y = robot.Y,
-            Orientation = robot.Orientation,
-            PixelX = robot.PixelX,
-            PixelY = robot.PixelY,
-            Height = robot.Height
-        });
+            frame = _latestPacket;
+            _latestPacket = null;
+            _updateScheduled = false;
+        }
+
+        if (frame == null)
+            return;
+
+        foreach (var robot in frame.RobotsBlue)
+            UpdateRobot("Blau", robot);
+
+        foreach (var robot in frame.RobotsYellow)
+            UpdateRobot("Gelb", robot);
+    }
+    private void UpdateRobot(string team, SSL_DetectionRobot robot)
+    {
+        var position = Positions.FirstOrDefault(p =>
+            p.Team == team && p.RobotId == robot.RobotId);
+
+        if (position == null)
+        {
+            position = new SSL_DetectionRobot_Liste
+            {
+                Team = team,
+                RobotId = robot.RobotId
+            };
+
+            Positions.Add(position);
+        }
+
+        position.Confidence = robot.Confidence;
+        position.X = robot.X;
+        position.Y = robot.Y;
+        position.Orientation = robot.Orientation;
+        position.PixelX = robot.PixelX;
+        position.PixelY = robot.PixelY;
+        position.Height = robot.Height;
+        position.LastSeenTimestamp = Stopwatch.GetTimestamp();
     }
 }

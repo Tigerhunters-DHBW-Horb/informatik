@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Tqg1a5WiMxg=",
+  "dgSpecHash": "bgzubTlM314=",
   "success": true,
-  "projectFilePath": "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
+  "projectFilePath": "c:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\dh10fre\\.nuget\\packages\\avalonia\\12.2.0\\avalonia.12.2.0.nupkg.sha512",
     "C:\\Users\\dh10fre\\.nuget\\packages\\avalonia.angle.windows.natives\\2.1.27548.20260419\\avalonia.angle.windows.natives.2.1.27548.20260419.nupkg.sha512",

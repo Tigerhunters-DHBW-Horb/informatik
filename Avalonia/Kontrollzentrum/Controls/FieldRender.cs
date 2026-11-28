@@ -4,6 +4,8 @@ using Avalonia.Media;
 using Kontrollzentrum.ViewModels;
 using System;
 using Avalonia.Threading;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace Kontrollzentrum;
 
@@ -16,7 +18,7 @@ public class FieldRender : Control
     {
         _timer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromMilliseconds(1000.0/60.0)
+            Interval = TimeSpan.FromMilliseconds(1000.0 / 60.0)
         };
 
         _timer.Tick += (_, _) => InvalidateVisual();
@@ -61,12 +63,26 @@ public class FieldRender : Control
             double x = field.Center.X - robot.X * scale;
             double y = field.Center.Y - robot.Y * scale;
 
-            context.DrawEllipse(
-                robot.TeamColor,
-                null,
-                new Point(x, y),
-                8,
-                8);
+            bool RoboterOffline = Stopwatch.GetElapsedTime(robot.LastSeenTimestamp) > TimeSpan.FromMilliseconds(500);
+
+            using (context.PushOpacity(RoboterOffline ? 0.3 : 1.0))
+            {
+                context.DrawEllipse(
+                    robot.TeamColor,
+                    null,
+                    new Point(x, y),
+                    16,
+                    16);
+
+                var idText = new FormattedText(
+                    robot.RobotId.ToString(),
+                    CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    new Typeface("Arial"),
+                    16,
+                    Brushes.White);
+                context.DrawText(idText, new Point(x - idText.Width / 2, y - idText.Height / 2));
+            }
         }
     }
 

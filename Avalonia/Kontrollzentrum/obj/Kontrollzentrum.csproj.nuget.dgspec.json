@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj": {}
+    "c:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj": {}
   },
   "projects": {
-    "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj": {
+    "c:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
+        "projectUniqueName": "c:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
         "projectName": "Kontrollzentrum",
-        "projectPath": "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
+        "projectPath": "c:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\Kontrollzentrum.csproj",
         "packagesPath": "C:\\Users\\dh10fre\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\obj\\",
+        "outputPath": "c:\\Users\\dh10fre\\github\\informatik\\Avalonia\\Kontrollzentrum\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

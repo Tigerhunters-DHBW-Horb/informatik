@@ -16,6 +16,7 @@ public class SSL_DetectionRobot_Liste
     public float Height { get; set; }
 
     public IBrush TeamColor => Team == "Blau" ? Brushes.Blue : Brushes.Yellow;
+    public long LastSeenTimestamp { get; set; }
 }
 
 
